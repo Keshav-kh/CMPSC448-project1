@@ -1,0 +1,188 @@
+{
+  "raw_completions": 255864,
+  "raw_prompts": 63936,
+  "raw_per_model": {
+    "wizardlm-13b": 16804,
+    "llama-2-7b-chat": 16773,
+    "vicuna-33b": 16753,
+    "ultralm-65b": 16681,
+    "llama-2-13b-chat": 16638,
+    "wizardlm-7b": 16596,
+    "ultralm-13b": 16583,
+    "llama-2-70b-chat": 16579,
+    "alpaca-7b": 16576,
+    "falcon-40b-instruct": 16568,
+    "gpt-3.5-turbo": 16561,
+    "mpt-30b-chat": 16561,
+    "wizardlm-70b": 16529,
+    "gpt-4": 16518,
+    "starchat": 13977,
+    "bard": 8333,
+    "pythia-12b": 834
+  },
+  "after_family_filter": 124531,
+  "after_drop_empty": 124429,
+  "after_dedup_response": 121784,
+  "after_dedup_prompt_model": 121765,
+  "after_length_filter": 116029,
+  "per_family_before_balance": {
+    "LLaMA-2": 49702,
+    "GPT": 27697,
+    "Falcon": 15403,
+    "MPT": 14961,
+    "Bard": 8266
+  },
+  "per_family_after_balance": {
+    "Bard": 4000,
+    "Falcon": 4000,
+    "GPT": 4000,
+    "LLaMA-2": 4000,
+    "MPT": 4000
+  },
+  "n_total": 20000,
+  "n_unique_prompts": 17899,
+  "responses_per_prompt": {
+    "1": 15904,
+    "2": 1892,
+    "3": 100,
+    "4": 3
+  },
+  "prompts_with_multiple_families": 1880,
+  "split_counts": {
+    "train": 16009,
+    "val": 1999,
+    "test": 1992
+  },
+  "split_family_counts": {
+    "test": {
+      "Bard": 371,
+      "Falcon": 394,
+      "GPT": 447,
+      "LLaMA-2": 388,
+      "MPT": 392
+    },
+    "train": {
+      "Bard": 3224,
+      "Falcon": 3180,
+      "GPT": 3176,
+      "LLaMA-2": 3207,
+      "MPT": 3222
+    },
+    "val": {
+      "Bard": 405,
+      "Falcon": 426,
+      "GPT": 377,
+      "LLaMA-2": 405,
+      "MPT": 386
+    }
+  },
+  "task_family_counts": {
+    "chat": {
+      "Bard": 1851,
+      "Falcon": 1381,
+      "GPT": 1634,
+      "LLaMA-2": 1350,
+      "MPT": 1450
+    },
+    "coding": {
+      "Bard": 690,
+      "Falcon": 682,
+      "GPT": 706,
+      "LLaMA-2": 641,
+      "MPT": 700
+    },
+    "factual_qa": {
+      "Bard": 368,
+      "Falcon": 174,
+      "GPT": 208,
+      "LLaMA-2": 201,
+      "MPT": 211
+    },
+    "math": {
+      "Bard": 257,
+      "Falcon": 374,
+      "GPT": 331,
+      "LLaMA-2": 373,
+      "MPT": 351
+    },
+    "nlp_task": {
+      "Bard": 258,
+      "Falcon": 974,
+      "GPT": 622,
+      "LLaMA-2": 1041,
+      "MPT": 836
+    },
+    "writing": {
+      "Bard": 576,
+      "Falcon": 415,
+      "GPT": 499,
+      "LLaMA-2": 394,
+      "MPT": 452
+    }
+  },
+  "source_family_counts": {
+    "evol_instruct": {
+      "Bard": 1064,
+      "Falcon": 638,
+      "GPT": 668,
+      "LLaMA-2": 627,
+      "MPT": 650
+    },
+    "false_qa": {
+      "Bard": 263,
+      "Falcon": 134,
+      "GPT": 163,
+      "LLaMA-2": 157,
+      "MPT": 148
+    },
+    "flan_v2_cot": {
+      "Bard": 337,
+      "Falcon": 190,
+      "GPT": 170,
+      "LLaMA-2": 182,
+      "MPT": 160
+    },
+    "flan_v2_flan2021": {
+      "Bard": 0,
+      "Falcon": 15,
+      "GPT": 25,
+      "LLaMA-2": 19,
+      "MPT": 22
+    },
+    "flan_v2_niv2": {
+      "Bard": 0,
+      "Falcon": 916,
+      "GPT": 569,
+      "LLaMA-2": 977,
+      "MPT": 786
+    },
+    "flan_v2_p3": {
+      "Bard": 0,
+      "Falcon": 119,
+      "GPT": 64,
+      "LLaMA-2": 126,
+      "MPT": 115
+    },
+    "sharegpt": {
+      "Bard": 1057,
+      "Falcon": 1325,
+      "GPT": 1568,
+      "LLaMA-2": 1339,
+      "MPT": 1385
+    },
+    "truthful_qa": {
+      "Bard": 105,
+      "Falcon": 40,
+      "GPT": 45,
+      "LLaMA-2": 44,
+      "MPT": 63
+    },
+    "ultrachat": {
+      "Bard": 1174,
+      "Falcon": 623,
+      "GPT": 728,
+      "LLaMA-2": 529,
+      "MPT": 671
+    }
+  }
+}
