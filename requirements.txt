@@ -1,0 +1,9 @@
+torch>=2.2
+scikit-learn>=1.4
+pandas>=2.0
+numpy>=1.26
+scipy>=1.11
+matplotlib>=3.8
+pyarrow>=14
+huggingface_hub>=0.20
+pypandoc_binary>=1.13   # only needed to rebuild report.pdf (needs a LaTeX engine, e.g. MiKTeX/TeX Live xelatex)

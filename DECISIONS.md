@@ -16,3 +16,9 @@ Decisions made while building the project (deadline-driven, no back-and-forth), 
 - **Task label**: `truthful_qa`/`false_qa` -> factual_qa; otherwise regex heuristics on the first 600 chars of the prompt: code keywords -> coding; math keywords/arithmetic -> math; any remaining `flan_*` -> nlp_task; writing keywords -> writing; else chat. Heuristic is noisy; documented as a limitation.
 - **Split**: 80/10/10 over unique prompts (seed 448), so a prompt never appears in two splits (assert in code).
 - **Observation**: after random downsampling only 1,880 / 17,899 prompts have >1 family, so most prompts appear once. Bard has 0 examples from `flan_v2_niv2`/`flan_v2_p3`/`flan2021` (Bard was not run on those subsets) - a source/label correlation that input-only models can exploit (RQ2).
+- User instruction (mid-run): do not push anything. Commits are local only; no remote configured.
+
+## Step 2 - Models (speed fallback)
+- First BiLSTM (hidden 128, packed sequences, 4 jobs in parallel) took >10 min per epoch on CPU. Benchmarked: packing was ~3x slower than an unpacked LSTM on this machine. Fallback: **unpacked BiLSTM, hidden 64 per direction, masked mean+max pooling (final hidden state dropped because it would see padding)**, length-bucketed batches to cut padding, max 6 epochs with early stopping (patience 2) on val accuracy. CNN uses the same loop for consistency.
+- Tokeniser is case-preserving (regex `\n|\w+|[^\w\s]`, newline kept as `<nl>`) so that the "lowercase + strip punctuation" ablation in RQ4 actually removes information. Vocab: train split only, min freq 2, max 30k.
+- RQ2 "input + output": prompt truncated to 64 tokens, then `<sep>`, then the response, total max 256 tokens.
