@@ -53,9 +53,10 @@ def set_seed(seed):
 @torch.no_grad()
 def predict(model, loader):
     model.eval()
+    dev = next(model.parameters()).device
     preds = []
     for X, lens, _ in loader:
-        preds.append(model(X, lens).argmax(1))
+        preds.append(model(X.to(dev), lens.to(dev)).argmax(1).cpu())
     return torch.cat(preds).numpy()
 
 
@@ -78,6 +79,7 @@ def main():
     args = ap.parse_args()
 
     torch.set_num_threads(args.threads)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     set_seed(args.seed)
     name = args.name or "_".join(
         [args.model, args.setup, args.ablation]
@@ -108,7 +110,7 @@ def main():
     )
     val_loader, test_loader = mk(tok(va), va, False), mk(tok(te), te, False)
 
-    model = build_model(args.model, len(vocab), len(FAMILIES))
+    model = build_model(args.model, len(vocab), len(FAMILIES)).to(device)
     n_params = sum(p.numel() for p in model.parameters())
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     loss_fn = nn.CrossEntropyLoss()
@@ -119,6 +121,7 @@ def main():
         model.train()
         tot, n = 0.0, 0
         for X, lens, y in train_loader:
+            X, lens, y = X.to(device), lens.to(device), y.to(device)
             opt.zero_grad()
             loss = loss_fn(model(X, lens), y)
             loss.backward()
@@ -142,7 +145,7 @@ def main():
         "name": name, "args": vars(args), "n_params": n_params, "vocab_size": len(vocab),
         "n_train": len(tr), "n_val": len(va), "n_test": len(te),
         "best_epoch": best_epoch, "epochs_run": len(history), "best_val_acc": best_acc,
-        "train_time_s": time.time() - t0, "history": history,
+        "train_time_s": time.time() - t0, "history": history, "device": str(device),
     }
     p = predict(model, test_loader)
     res["test"] = compute_metrics(te.label.values, p, tasks=te.task.values)

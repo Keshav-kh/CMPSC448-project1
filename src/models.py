@@ -46,7 +46,7 @@ class BiLSTM(nn.Module):
 
     def forward(self, x, lens):
         out, _ = self.lstm(self.drop(self.emb(x)))
-        mask = (torch.arange(x.size(1))[None, :] < lens[:, None]).unsqueeze(2)
+        mask = (torch.arange(x.size(1), device=x.device)[None, :] < lens[:, None]).unsqueeze(2)
         mean = (out * mask).sum(1) / lens[:, None].clamp(min=1)
         mx = out.masked_fill(~mask, float("-inf")).max(1).values
         return self.fc(self.drop(torch.cat([mean, mx], dim=1)))
