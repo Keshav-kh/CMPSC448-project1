@@ -23,3 +23,4 @@ Decisions made while building the project (deadline-driven, no back-and-forth), 
 - Tokeniser is case-preserving (regex `\n|\w+|[^\w\s]`, newline kept as `<nl>`) so that the "lowercase + strip punctuation" ablation in RQ4 actually removes information. Vocab: train split only, min freq 2, max 30k.
 - RQ2 "input + output": prompt truncated to 64 tokens, then `<sep>`, then the response, total max 256 tokens.
 - Added optional CUDA support to train.py (falls back to CPU) and scripts/icds_array.slurm so experiments can be run as a Slurm job array on Penn State ICDS Roar Collab. Each run JSON records the device it used.
+- train.py now skips a run whose result JSON already exists (use --force to redo), so 'bash scripts/resume_local.sh' resumes after any interruption. Each run's log is written only when the run starts, so a killed run simply restarts from scratch.

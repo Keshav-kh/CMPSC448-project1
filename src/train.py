@@ -76,6 +76,7 @@ def main():
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--out_dir", default="results/runs")
     ap.add_argument("--name", default=None)
+    ap.add_argument("--force", action="store_true", help="re-run even if the result JSON already exists")
     args = ap.parse_args()
 
     torch.set_num_threads(args.threads)
@@ -86,6 +87,11 @@ def main():
         + ([f"holdout-{args.holdout_task}"] if args.holdout_task else [])
         + [f"s{args.seed}"]
     )
+
+    out_path = os.path.join(args.out_dir, name + ".json")
+    if os.path.exists(out_path) and not args.force:
+        print(f"[{name}] already done ({out_path}), skipping", flush=True)
+        return
 
     df = load_dataset()
     tr, va, te = (df[df.split == s] for s in ("train", "val", "test"))
@@ -154,7 +160,7 @@ def main():
         res["test_heldout_all_rows"] = compute_metrics(te_all.label.values, predict(model, all_loader))
         res["n_test_heldout_all_rows"] = len(te_all)
     os.makedirs(args.out_dir, exist_ok=True)
-    with open(os.path.join(args.out_dir, name + ".json"), "w") as f:
+    with open(out_path, "w") as f:
         json.dump(res, f, indent=1)
     print(f"[{name}] TEST acc {res['test']['accuracy']:.4f} macroF1 {res['test']['macro_f1']:.4f}", flush=True)
 
