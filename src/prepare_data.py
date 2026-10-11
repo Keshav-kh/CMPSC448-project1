@@ -45,6 +45,11 @@ WRITE_RE = re.compile(
 )
 
 
+# Generator/serialisation artifacts (e.g. Falcon's literal "</s>" end-of-sequence token) would
+# give away the label without saying anything about writing style, so they are removed.
+ARTIFACT_RE = re.compile(r"</?s>|<\|endoftext\|>|<\|im_(?:start|end)\|>|\[/?INST\]")
+
+
 def assign_task(source: str, prompt: str) -> str:
     if source in ("truthful_qa", "false_qa"):
         return "factual_qa"
@@ -99,7 +104,10 @@ def main():
     stats["after_family_filter"] = len(df)
 
     df["prompt"] = df.prompt.fillna("").astype(str).str.strip()
-    df["response"] = df.response.fillna("").astype(str).str.strip()
+    df["response"] = df.response.fillna("").astype(str)
+    has_art = df.response.str.contains(ARTIFACT_RE)
+    stats["artifact_rows_removed_tokens_by_family"] = df[has_art].family.value_counts().to_dict()
+    df["response"] = df.response.str.replace(ARTIFACT_RE, "", regex=True).str.strip()
     df = df[(df.prompt != "") & (df.response != "")]
     stats["after_drop_empty"] = len(df)
     df = df.drop_duplicates(subset=["response"])
@@ -135,6 +143,9 @@ def main():
     df["split"] = df.prompt.map(split_of)
     df["prompt_id"] = pd.factorize(df.prompt)[0]
 
+    # Shuffle rows so files and evaluation batches are not ordered by family.
+    df = df.sample(frac=1.0, random_state=SEED).reset_index(drop=True)
+    df["prompt_id"] = pd.factorize(df.prompt)[0]
     df = df[["prompt_id", "source", "task", "model", "family", "prompt", "response", "split"]]
     df.to_parquet(os.path.join(args.out_dir, "dataset.parquet"), index=False)
 

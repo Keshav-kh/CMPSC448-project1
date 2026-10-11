@@ -14,6 +14,7 @@ src/eval.py           metrics + aggregation -> results/summary.json, results/tab
 src/baseline.py       TF-IDF + logistic regression baseline, input-only leakage checks
 src/features.py       RQ4 hand-crafted features, per-family stats, feature-only classifiers
 src/make_report.py    builds report figures/tables from results/*.json and renders report.pdf
+tests/test_invariance.py  padding / batch-size / order invariance test for both models
 scripts/*.txt         exact command lists used for every experiment; scripts/run_parallel.sh runs them
 ```
 
@@ -24,26 +25,24 @@ python -m pip install -r requirements.txt
 Tested with Python 3.14, torch 2.9.1 (CPU only), scikit-learn 1.7.2, pandas 2.3.3.
 
 ## Reproduce
-1. **Data** (≈940 MB download; the processed parquet is already committed, so this is optional):
-   ```
-   python -c "from huggingface_hub import hf_hub_download as d; [d('openbmb/UltraFeedback', f, repo_type='dataset', local_dir='data/raw') for f in ['evol_instruct.jsonl','false_qa.jsonl','flan.jsonl','sharegpt.jsonl','truthful_qa.jsonl','ultrachat.jsonl']]"
-   python src/prepare_data.py
-   ```
-2. **Smoke test**: `python src/train.py --model cnn --setup output --max_train 400 --epochs 1 --out_dir results/smoke`
-3. **RQ1 + RQ2** (2 models x 3 setups x 3 seeds): `bash scripts/run_parallel.sh scripts/rq12_cmds.txt 4`
-4. **Baseline + input leakage**: `python src/baseline.py`
-5. **RQ3** (leave-one-task-out): `bash scripts/run_parallel.sh scripts/rq3_cmds.txt 4`
-6. **RQ4** features: `python src/features.py`; ablations: `bash scripts/run_parallel.sh scripts/rq4_cmds.txt 4`
-7. **Aggregate + report**: `python src/eval.py && python src/make_report.py`
+One entry point runs everything (after `pip install -r requirements.txt`):
+```
+bash scripts/run_all.sh 4
+```
+Steps it runs, which can also be run individually:
+1. `python tests/test_invariance.py` checks that CNN/BiLSTM outputs do not depend on padding, batch size or order.
+2. `python src/prepare_data.py` rebuilds `data/processed/dataset.parquet` from the raw UltraFeedback JSONL (download command in DATA.md; the processed file is already included).
+3. `python src/baseline.py` runs the TF-IDF baseline, the input-only leakage checks (prompt-cluster bootstrap, no-Bard and within-ShareGPT controls) and the truncation statistics. `python src/features.py` runs the RQ4 feature analysis. `python scripts/bench_lstm.py` runs the BiLSTM speed benchmark.
+4. `bash scripts/run_parallel.sh scripts/v2_all_cmds.txt 4` trains all 96 neural runs: RQ1/RQ2 2 models x 3 setups x 3 seeds; RQ3 held-out and size-matched controls; RQ4 5 ablations x 2 models x 3 seeds. Runs that already have a result JSON are skipped.
+5. `python src/eval.py` validates that every run shares the same model version, data file hash and training configuration, then aggregates them (mean ± std over seeds, prompt-cluster bootstrap CIs).
+6. `python src/make_report.py` renders `report.md` and `report.pdf`.
 
-All runs use fixed seeds (1, 2, 3); data split seed is 448. Hardware: CPU only (16 logical cores), 4 runs in parallel x 4 threads.
+`results/archive_v1_padding_bug/` keeps the first round of results, produced by models with a padding bug (see report Section 5); it is not used by any table.
 
 ## Resuming and running on a cluster (ICDS Roar Collab)
 - `train.py` skips any run whose `results/runs/<name>.json` exists (`--force` to redo), so `bash scripts/resume_local.sh` resumes after an interruption.
 - On Roar Collab: copy the repo, create a conda env (`module load anaconda; conda create -n whowrote python=3.11; source activate whowrote; pip install -r requirements.txt`), then submit one array task per command line:
   ```
-  sed '/--gpus=1/d' scripts/icds_array.slurm > scripts/icds_array_cpu.slurm   # CPU version (used for our runs)
-  sbatch --account=open --time=02:00:00 --array=1-24 scripts/icds_array_cpu.slurm scripts/rq3_cmds.txt
-  sbatch --account=open --time=02:00:00 --array=1-18 scripts/icds_array_cpu.slurm scripts/rq4_cmds.txt
+  sbatch --account=open --array=1-96 scripts/icds_array_cpu.slurm scripts/v2_all_cmds.txt
   ```
   Copy `results/runs/*.json` back and run `python src/eval.py && python src/make_report.py`.

@@ -8,6 +8,7 @@ Examples
   python src/train.py --model cnn --setup output --max_train 500 --epochs 1        # smoke test
 """
 import argparse
+import hashlib
 import json
 import os
 import random
@@ -20,7 +21,7 @@ from torch.utils.data import DataLoader
 
 from data import FAMILIES, TextDataset, Vocab, build_tokens, collate, load_dataset
 from eval import compute_metrics
-from models import build_model
+from models import MODEL_VERSION, build_model
 
 
 class BucketBatchSampler:
@@ -64,8 +65,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", choices=["cnn", "rnn"], required=True)
     ap.add_argument("--setup", choices=["output", "input", "both"], default="output")
-    ap.add_argument("--ablation", choices=["none", "no_length", "no_format", "lower_nopunct"], default="none")
+    ap.add_argument("--ablation", choices=["none", "no_length", "window64", "no_format", "lower_nopunct", "all_surface"], default="none")
     ap.add_argument("--holdout_task", default=None, help="RQ3: exclude this task from train/val, test on it")
+    ap.add_argument("--size_match_task", default=None,
+                    help="RQ3 control: keep all tasks but subsample train to the size it has without this task")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--epochs", type=int, default=6)
     ap.add_argument("--patience", type=int, default=2)
@@ -85,6 +88,7 @@ def main():
     name = args.name or "_".join(
         [args.model, args.setup, args.ablation]
         + ([f"holdout-{args.holdout_task}"] if args.holdout_task else [])
+        + ([f"sizematch-{args.size_match_task}"] if args.size_match_task else [])
         + [f"s{args.seed}"]
     )
 
@@ -100,6 +104,9 @@ def main():
         te_all = df[df.task == t]           # every row of the unseen task (never trained on)
         te = te[te.task == t]               # same rows the in-domain models are scored on
         tr, va = tr[tr.task != t], va[va.task != t]
+    if args.size_match_task:
+        n_match = int((tr.task != args.size_match_task).sum())
+        tr = tr.sample(n=n_match, random_state=args.seed)
     if args.max_train:
         tr = tr.sample(n=min(args.max_train, len(tr)), random_state=args.seed)
 
@@ -150,11 +157,15 @@ def main():
     res = {
         "name": name, "args": vars(args), "n_params": n_params, "vocab_size": len(vocab),
         "n_train": len(tr), "n_val": len(va), "n_test": len(te),
+        "model_version": MODEL_VERSION,
+        "data_md5": hashlib.md5(open("data/processed/dataset.parquet", "rb").read()).hexdigest(),
         "best_epoch": best_epoch, "epochs_run": len(history), "best_val_acc": best_acc,
         "train_time_s": time.time() - t0, "history": history, "device": str(device),
     }
     p = predict(model, test_loader)
     res["test"] = compute_metrics(te.label.values, p, tasks=te.task.values)
+    res["test_predictions"] = {"prompt_id": te.prompt_id.astype(int).tolist(), "y_true": te.label.astype(int).tolist(),
+                               "y_pred": p.astype(int).tolist()}
     if args.holdout_task:
         all_loader = mk(tok(te_all), te_all, False)
         res["test_heldout_all_rows"] = compute_metrics(te_all.label.values, predict(model, all_loader))

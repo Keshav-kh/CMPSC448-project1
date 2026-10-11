@@ -1,0 +1,96 @@
+python src/train.py --model rnn --setup output --seed 1 --threads 4 > logs/rnn_output_s1.log 2>&1
+python src/train.py --model rnn --setup both --seed 1 --threads 4 > logs/rnn_both_s1.log 2>&1
+python src/train.py --model rnn --setup input --seed 1 --threads 4 > logs/rnn_input_s1.log 2>&1
+python src/train.py --model rnn --setup output --seed 2 --threads 4 > logs/rnn_output_s2.log 2>&1
+python src/train.py --model rnn --setup both --seed 2 --threads 4 > logs/rnn_both_s2.log 2>&1
+python src/train.py --model rnn --setup input --seed 2 --threads 4 > logs/rnn_input_s2.log 2>&1
+python src/train.py --model rnn --setup output --seed 3 --threads 4 > logs/rnn_output_s3.log 2>&1
+python src/train.py --model rnn --setup both --seed 3 --threads 4 > logs/rnn_both_s3.log 2>&1
+python src/train.py --model rnn --setup input --seed 3 --threads 4 > logs/rnn_input_s3.log 2>&1
+python src/train.py --model rnn --setup output --ablation no_length --seed 1 --threads 4 > logs/rnn_no_length_s1.log 2>&1
+python src/train.py --model rnn --setup output --ablation window64 --seed 1 --threads 4 > logs/rnn_window64_s1.log 2>&1
+python src/train.py --model rnn --setup output --ablation no_format --seed 1 --threads 4 > logs/rnn_no_format_s1.log 2>&1
+python src/train.py --model rnn --setup output --ablation lower_nopunct --seed 1 --threads 4 > logs/rnn_lower_nopunct_s1.log 2>&1
+python src/train.py --model rnn --setup output --ablation all_surface --seed 1 --threads 4 > logs/rnn_all_surface_s1.log 2>&1
+python src/train.py --model rnn --setup output --ablation no_length --seed 2 --threads 4 > logs/rnn_no_length_s2.log 2>&1
+python src/train.py --model rnn --setup output --ablation window64 --seed 2 --threads 4 > logs/rnn_window64_s2.log 2>&1
+python src/train.py --model rnn --setup output --ablation no_format --seed 2 --threads 4 > logs/rnn_no_format_s2.log 2>&1
+python src/train.py --model rnn --setup output --ablation lower_nopunct --seed 2 --threads 4 > logs/rnn_lower_nopunct_s2.log 2>&1
+python src/train.py --model rnn --setup output --ablation all_surface --seed 2 --threads 4 > logs/rnn_all_surface_s2.log 2>&1
+python src/train.py --model rnn --setup output --ablation no_length --seed 3 --threads 4 > logs/rnn_no_length_s3.log 2>&1
+python src/train.py --model rnn --setup output --ablation window64 --seed 3 --threads 4 > logs/rnn_window64_s3.log 2>&1
+python src/train.py --model rnn --setup output --ablation no_format --seed 3 --threads 4 > logs/rnn_no_format_s3.log 2>&1
+python src/train.py --model rnn --setup output --ablation lower_nopunct --seed 3 --threads 4 > logs/rnn_lower_nopunct_s3.log 2>&1
+python src/train.py --model rnn --setup output --ablation all_surface --seed 3 --threads 4 > logs/rnn_all_surface_s3.log 2>&1
+python src/train.py --model rnn --setup output --holdout_task writing --seed 1 --threads 4 > logs/rnn_holdout-writing_s1.log 2>&1
+python src/train.py --model rnn --setup output --size_match_task writing --seed 1 --threads 4 > logs/rnn_sizematch-writing_s1.log 2>&1
+python src/train.py --model rnn --setup output --holdout_task coding --seed 1 --threads 4 > logs/rnn_holdout-coding_s1.log 2>&1
+python src/train.py --model rnn --setup output --size_match_task coding --seed 1 --threads 4 > logs/rnn_sizematch-coding_s1.log 2>&1
+python src/train.py --model rnn --setup output --holdout_task writing --seed 2 --threads 4 > logs/rnn_holdout-writing_s2.log 2>&1
+python src/train.py --model rnn --setup output --size_match_task writing --seed 2 --threads 4 > logs/rnn_sizematch-writing_s2.log 2>&1
+python src/train.py --model rnn --setup output --holdout_task coding --seed 2 --threads 4 > logs/rnn_holdout-coding_s2.log 2>&1
+python src/train.py --model rnn --setup output --size_match_task coding --seed 2 --threads 4 > logs/rnn_sizematch-coding_s2.log 2>&1
+python src/train.py --model rnn --setup output --holdout_task writing --seed 3 --threads 4 > logs/rnn_holdout-writing_s3.log 2>&1
+python src/train.py --model rnn --setup output --size_match_task writing --seed 3 --threads 4 > logs/rnn_sizematch-writing_s3.log 2>&1
+python src/train.py --model rnn --setup output --holdout_task coding --seed 3 --threads 4 > logs/rnn_holdout-coding_s3.log 2>&1
+python src/train.py --model rnn --setup output --size_match_task coding --seed 3 --threads 4 > logs/rnn_sizematch-coding_s3.log 2>&1
+python src/train.py --model cnn --setup output --seed 1 --threads 4 > logs/cnn_output_s1.log 2>&1
+python src/train.py --model cnn --setup both --seed 1 --threads 4 > logs/cnn_both_s1.log 2>&1
+python src/train.py --model cnn --setup input --seed 1 --threads 4 > logs/cnn_input_s1.log 2>&1
+python src/train.py --model cnn --setup output --seed 2 --threads 4 > logs/cnn_output_s2.log 2>&1
+python src/train.py --model cnn --setup both --seed 2 --threads 4 > logs/cnn_both_s2.log 2>&1
+python src/train.py --model cnn --setup input --seed 2 --threads 4 > logs/cnn_input_s2.log 2>&1
+python src/train.py --model cnn --setup output --seed 3 --threads 4 > logs/cnn_output_s3.log 2>&1
+python src/train.py --model cnn --setup both --seed 3 --threads 4 > logs/cnn_both_s3.log 2>&1
+python src/train.py --model cnn --setup input --seed 3 --threads 4 > logs/cnn_input_s3.log 2>&1
+python src/train.py --model cnn --setup output --ablation no_length --seed 1 --threads 4 > logs/cnn_no_length_s1.log 2>&1
+python src/train.py --model cnn --setup output --ablation window64 --seed 1 --threads 4 > logs/cnn_window64_s1.log 2>&1
+python src/train.py --model cnn --setup output --ablation no_format --seed 1 --threads 4 > logs/cnn_no_format_s1.log 2>&1
+python src/train.py --model cnn --setup output --ablation lower_nopunct --seed 1 --threads 4 > logs/cnn_lower_nopunct_s1.log 2>&1
+python src/train.py --model cnn --setup output --ablation all_surface --seed 1 --threads 4 > logs/cnn_all_surface_s1.log 2>&1
+python src/train.py --model cnn --setup output --ablation no_length --seed 2 --threads 4 > logs/cnn_no_length_s2.log 2>&1
+python src/train.py --model cnn --setup output --ablation window64 --seed 2 --threads 4 > logs/cnn_window64_s2.log 2>&1
+python src/train.py --model cnn --setup output --ablation no_format --seed 2 --threads 4 > logs/cnn_no_format_s2.log 2>&1
+python src/train.py --model cnn --setup output --ablation lower_nopunct --seed 2 --threads 4 > logs/cnn_lower_nopunct_s2.log 2>&1
+python src/train.py --model cnn --setup output --ablation all_surface --seed 2 --threads 4 > logs/cnn_all_surface_s2.log 2>&1
+python src/train.py --model cnn --setup output --ablation no_length --seed 3 --threads 4 > logs/cnn_no_length_s3.log 2>&1
+python src/train.py --model cnn --setup output --ablation window64 --seed 3 --threads 4 > logs/cnn_window64_s3.log 2>&1
+python src/train.py --model cnn --setup output --ablation no_format --seed 3 --threads 4 > logs/cnn_no_format_s3.log 2>&1
+python src/train.py --model cnn --setup output --ablation lower_nopunct --seed 3 --threads 4 > logs/cnn_lower_nopunct_s3.log 2>&1
+python src/train.py --model cnn --setup output --ablation all_surface --seed 3 --threads 4 > logs/cnn_all_surface_s3.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task writing --seed 1 --threads 4 > logs/cnn_holdout-writing_s1.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task writing --seed 1 --threads 4 > logs/cnn_sizematch-writing_s1.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task coding --seed 1 --threads 4 > logs/cnn_holdout-coding_s1.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task coding --seed 1 --threads 4 > logs/cnn_sizematch-coding_s1.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task chat --seed 1 --threads 4 > logs/cnn_holdout-chat_s1.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task chat --seed 1 --threads 4 > logs/cnn_sizematch-chat_s1.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task math --seed 1 --threads 4 > logs/cnn_holdout-math_s1.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task math --seed 1 --threads 4 > logs/cnn_sizematch-math_s1.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task nlp_task --seed 1 --threads 4 > logs/cnn_holdout-nlp_task_s1.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task nlp_task --seed 1 --threads 4 > logs/cnn_sizematch-nlp_task_s1.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task factual_qa --seed 1 --threads 4 > logs/cnn_holdout-factual_qa_s1.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task factual_qa --seed 1 --threads 4 > logs/cnn_sizematch-factual_qa_s1.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task writing --seed 2 --threads 4 > logs/cnn_holdout-writing_s2.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task writing --seed 2 --threads 4 > logs/cnn_sizematch-writing_s2.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task coding --seed 2 --threads 4 > logs/cnn_holdout-coding_s2.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task coding --seed 2 --threads 4 > logs/cnn_sizematch-coding_s2.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task chat --seed 2 --threads 4 > logs/cnn_holdout-chat_s2.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task chat --seed 2 --threads 4 > logs/cnn_sizematch-chat_s2.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task math --seed 2 --threads 4 > logs/cnn_holdout-math_s2.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task math --seed 2 --threads 4 > logs/cnn_sizematch-math_s2.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task nlp_task --seed 2 --threads 4 > logs/cnn_holdout-nlp_task_s2.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task nlp_task --seed 2 --threads 4 > logs/cnn_sizematch-nlp_task_s2.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task factual_qa --seed 2 --threads 4 > logs/cnn_holdout-factual_qa_s2.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task factual_qa --seed 2 --threads 4 > logs/cnn_sizematch-factual_qa_s2.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task writing --seed 3 --threads 4 > logs/cnn_holdout-writing_s3.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task writing --seed 3 --threads 4 > logs/cnn_sizematch-writing_s3.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task coding --seed 3 --threads 4 > logs/cnn_holdout-coding_s3.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task coding --seed 3 --threads 4 > logs/cnn_sizematch-coding_s3.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task chat --seed 3 --threads 4 > logs/cnn_holdout-chat_s3.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task chat --seed 3 --threads 4 > logs/cnn_sizematch-chat_s3.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task math --seed 3 --threads 4 > logs/cnn_holdout-math_s3.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task math --seed 3 --threads 4 > logs/cnn_sizematch-math_s3.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task nlp_task --seed 3 --threads 4 > logs/cnn_holdout-nlp_task_s3.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task nlp_task --seed 3 --threads 4 > logs/cnn_sizematch-nlp_task_s3.log 2>&1
+python src/train.py --model cnn --setup output --holdout_task factual_qa --seed 3 --threads 4 > logs/cnn_holdout-factual_qa_s3.log 2>&1
+python src/train.py --model cnn --setup output --size_match_task factual_qa --seed 3 --threads 4 > logs/cnn_sizematch-factual_qa_s3.log 2>&1

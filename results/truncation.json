@@ -1,0 +1,25 @@
+{
+ "max_len": 256,
+ "pct_over_256_all": 0.45145,
+ "pct_over_256_by_family": {
+  "Bard": 0.641,
+  "Falcon": 0.15225,
+  "GPT": 0.543,
+  "LLaMA-2": 0.49825,
+  "MPT": 0.42275
+ },
+ "median_tokens_by_family": {
+  "Bard": 336.5,
+  "Falcon": 79.5,
+  "GPT": 302.0,
+  "LLaMA-2": 254.5,
+  "MPT": 210.0
+ },
+ "pct_over_64_by_family": {
+  "Bard": 0.93175,
+  "Falcon": 0.575,
+  "GPT": 0.769,
+  "LLaMA-2": 0.9345,
+  "MPT": 0.7955
+ }
+}

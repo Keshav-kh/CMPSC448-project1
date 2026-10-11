@@ -1,0 +1,127 @@
+{
+ "name": "cnn_input_none_s2",
+ "args": {
+  "model": "cnn",
+  "setup": "input",
+  "ablation": "none",
+  "holdout_task": null,
+  "seed": 2,
+  "epochs": 6,
+  "patience": 2,
+  "batch_size": 64,
+  "lr": 0.001,
+  "max_len": 256,
+  "max_train": null,
+  "threads": 4,
+  "out_dir": "results/runs",
+  "name": null
+ },
+ "n_params": 4039301,
+ "vocab_size": 30003,
+ "n_train": 16009,
+ "n_val": 1999,
+ "n_test": 1992,
+ "best_epoch": 2,
+ "epochs_run": 4,
+ "best_val_acc": 0.24412206103051526,
+ "train_time_s": 149.99922823905945,
+ "history": [
+  {
+   "epoch": 1,
+   "train_loss": 1.8396890984162957,
+   "val_acc": 0.19009504752376188,
+   "time_s": 37.393200635910034
+  },
+  {
+   "epoch": 2,
+   "train_loss": 1.6549158443017489,
+   "val_acc": 0.24412206103051526,
+   "time_s": 76.06663751602173
+  },
+  {
+   "epoch": 3,
+   "train_loss": 1.6421189844976902,
+   "val_acc": 0.23161580790395198,
+   "time_s": 111.04048562049866
+  },
+  {
+   "epoch": 4,
+   "train_loss": 1.6310001369404,
+   "val_acc": 0.23961980990495246,
+   "time_s": 149.99503993988037
+  }
+ ],
+ "device": "cpu",
+ "test": {
+  "accuracy": 0.2213855421686747,
+  "macro_f1": 0.15727953317894258,
+  "confusion_matrix": [
+   [
+    195,
+    0,
+    48,
+    128,
+    0
+   ],
+   [
+    144,
+    0,
+    45,
+    205,
+    0
+   ],
+   [
+    185,
+    0,
+    62,
+    200,
+    0
+   ],
+   [
+    151,
+    1,
+    52,
+    184,
+    0
+   ],
+   [
+    144,
+    0,
+    47,
+    201,
+    0
+   ]
+  ],
+  "per_family_acc": {
+   "Bard": 0.5256064690026954,
+   "Falcon": 0.0,
+   "GPT": 0.13870246085011187,
+   "LLaMA-2": 0.4742268041237113,
+   "MPT": 0.0
+  },
+  "per_family_f1": {
+   "Bard": 0.3277310924369748,
+   "Falcon": 0.0,
+   "GPT": 0.1768901569186876,
+   "LLaMA-2": 0.28177641653905056,
+   "MPT": 0.0
+  },
+  "n": 1992,
+  "per_task_acc": {
+   "chat": 0.2047556142668428,
+   "coding": 0.21282798833819241,
+   "factual_qa": 0.2767857142857143,
+   "math": 0.24,
+   "nlp_task": 0.25348189415041783,
+   "writing": 0.1991869918699187
+  },
+  "per_task_n": {
+   "chat": 757,
+   "coding": 343,
+   "factual_qa": 112,
+   "math": 175,
+   "nlp_task": 359,
+   "writing": 246
+  }
+ }
+}

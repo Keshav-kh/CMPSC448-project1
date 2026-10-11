@@ -1,0 +1,10 @@
+{
+ "threads": 4,
+ "batch": 64,
+ "seq_len": 256,
+ "hidden": 64,
+ "torch": "2.9.1+cpu",
+ "packed_bilstm_s_per_batch": 0.32629947662353515,
+ "length_reversed_bilstm (ours)_s_per_batch": 0.09278721809387207,
+ "speedup": 3.5166425217471295
+}

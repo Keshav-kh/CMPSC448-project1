@@ -43,8 +43,8 @@ def lower_nopunct(text: str) -> str:
 def apply_text_ablation(text: str, ablation: str) -> str:
     if ablation == "no_format":
         return strip_markdown(text)
-    if ablation == "lower_nopunct":
-        return lower_nopunct(text)
+    if ablation in ("lower_nopunct", "all_surface"):
+        return lower_nopunct(strip_markdown(text) if ablation == "all_surface" else text)
     return text
 
 
@@ -70,14 +70,18 @@ def build_tokens(df: pd.DataFrame, setup: str, ablation: str = "none", max_len=2
     setup: 'output' (response only), 'input' (prompt only), 'both' (prompt <sep> response).
     ablation 'no_length': fixed-length window of the response; short responses are tiled
     cyclically so neither padding nor truncation reveals the length.
+    ablation 'window64': first 64 response tokens only (control: same budget, length kept).
+    ablation 'all_surface': markdown stripped + lowercased + punctuation removed + no_length.
     """
     out = []
     for p, r in zip(df.prompt, df.response):
         r = apply_text_ablation(r, ablation)
         rt = tokenize(r)
-        if ablation == "no_length":
-            L = 64
+        if ablation in ("no_length", "all_surface"):
+            L = 64  # tile short responses so neither padding nor truncation reveals length
             rt = (rt * (L // max(len(rt), 1) + 1))[:L] if rt else [UNK] * L
+        elif ablation == "window64":
+            rt = rt[:64]  # control for no_length: same 64-token budget, length still visible
         if setup == "output":
             toks = rt[:max_len]
         elif setup == "input":

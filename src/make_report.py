@@ -1,4 +1,5 @@
-"""Build report.md from results/*.json (every number is read from those files), then render report.pdf.
+"""Build report.md: every result number is read from results/*.json or data/processed/data_stats.json;
+hyperparameters and narrative are written in report_template.md and below. Then render report.pdf.
 
 python src/eval.py && python src/make_report.py
 """
@@ -11,9 +12,11 @@ from data import FAMILIES  # noqa: E402
 from report_tables import bar_figure, load, md_table, pct, pm  # noqa: E402
 
 TASKS = ["writing", "coding", "chat", "math", "nlp_task", "factual_qa"]
-ABLATIONS = [("no_length", "remove length (fixed 64-token window, short texts tiled)"),
+ABLATIONS = [("window64", "first 64 tokens only (control for no_length)"),
+             ("no_length", "64-token window, short texts tiled (no length)"),
              ("no_format", "strip markdown + line breaks"),
-             ("lower_nopunct", "lowercase + strip punctuation")]
+             ("lower_nopunct", "lowercase + strip punctuation (+ line breaks)"),
+             ("all_surface", "all of the above combined")]
 
 
 def main():
@@ -22,7 +25,12 @@ def main():
     B = load("baseline_tfidf.json")
     L = load("input_leakage.json")
     F = load("rq4_features.json")
+    T = load("truncation.json")
+    BL = load("bench_lstm.json")
+    A1 = load("archive_v1_padding_bug/summary.json")
+    VAL = S.pop("_validation")
     V = {}  # values injected into the template
+    ci = lambda b: f"[{pct(b['ci_low'])}, {pct(b['ci_high'])}]"
 
     # ------------------------------------------------------------------ data
     V["data_table"] = md_table(
@@ -37,6 +45,23 @@ def main():
         V[k] = f"{D[k]:,}"
     V["bard_before"] = f"{D['per_family_before_balance']['Bard']:,}"
     V["llama_before"] = f"{D['per_family_before_balance']['LLaMA-2']:,}"
+    art = D["artifact_rows_removed_tokens_by_family"]
+    V["artifact_falcon"] = f"{art.get('Falcon', 0):,}"
+    n_other = sum(v for k, v in art.items() if k != 'Falcon')
+    V["artifact_other"] = f"{n_other:,}"
+    V["artifact_other_rows"] = f"{n_other:,} row" + ("" if n_other == 1 else "s")
+    V["trunc_all"] = pct(T["pct_over_256_all"])
+    V["trunc_table"] = md_table(["", *FAMILIES],
+        [["median response length (tokens)"] + [f"{T['median_tokens_by_family'][f]:.0f}" for f in FAMILIES],
+         ["% longer than 256 tokens (truncated)"] + [pct(T["pct_over_256_by_family"][f]) for f in FAMILIES],
+         ["% longer than 64 tokens"] + [pct(T["pct_over_64_by_family"][f]) for f in FAMILIES]])
+    V["bench_packed"] = f"{BL['packed_bilstm_s_per_batch']:.3f}"
+    V["bench_ours"] = f"{BL['length_reversed_bilstm (ours)_s_per_batch']:.3f}"
+    V["bench_speedup"] = f"{BL['speedup']:.1f}"
+    V["n_runs"] = VAL["n_runs"]
+    V["devices"] = ", ".join(VAL["devices"])
+    V["model_version"] = VAL["model_version"]
+    V["data_md5"] = VAL["data_md5"][:8]
 
     # ------------------------------------------------------------------ training details
     c, r = S["cnn_output_none"], S["rnn_output_none"]
@@ -49,12 +74,14 @@ def main():
 
     # ------------------------------------------------------------------ RQ1
     V["rq1_table"] = md_table(
-        ["model", "test accuracy (%)", "macro-F1 (%)", "seeds"],
-        [["CNN (ours)", pm(c["accuracy"]), pm(c["macro_f1"]), 3],
-         ["BiLSTM (ours)", pm(r["accuracy"]), pm(r["macro_f1"]), 3],
-         ["TF-IDF + LogReg (baseline)", pct(B["output"]["accuracy"]), pct(B["output"]["macro_f1"]), "1 (deterministic)"],
-         ["Hand-crafted features + GBoost (RQ4)", pct(F["gboost"]["accuracy"]), pct(F["gboost"]["macro_f1"]), "1"],
-         ["Chance (uniform)", pct(0.2), "-", "-"]])
+        ["model", "test accuracy (%)", "95% CI (prompt bootstrap)", "macro-F1 (%)", "runs"],
+        [["CNN (ours)", pm(c["accuracy"]), ci(c["bootstrap"]), pm(c["macro_f1"]), "3 seeds"],
+         ["BiLSTM (ours)", pm(r["accuracy"]), ci(r["bootstrap"]), pm(r["macro_f1"]), "3 seeds"],
+         ["TF-IDF + LogReg (baseline)", pct(B["output"]["accuracy"]), ci(B["output"]["bootstrap"]), pct(B["output"]["macro_f1"]), "1 (deterministic)"],
+         ["Hand-crafted features + GBoost (RQ4)", pct(F["gboost"]["accuracy"]), "-", pct(F["gboost"]["macro_f1"]), "1"],
+         ["Chance (uniform)", pct(0.2), "-", "-", "-"]])
+    V["v1_cnn"] = pm(A1["cnn_output_none"]["accuracy"])
+    V["v1_rnn"] = pm(A1["rnn_output_none"]["accuracy"])
     V["rq1_family_table"] = md_table(
         ["family", "CNN", "BiLSTM", "TF-IDF"],
         [[f, pm(c["per_family_acc"][f]), pm(r["per_family_acc"][f]), pct(B["output"]["per_family_acc"][f])] for f in FAMILIES])
@@ -83,8 +110,17 @@ def main():
                errs={m: [S[f"{k}_{s}_none"]["accuracy"]["std"] for s in ("input", "output", "both")] for m, k in (("CNN", "cnn"), ("BiLSTM", "rnn"))} | {"TF-IDF": None},
                chance=0.2)
     V["maj_rate"] = pct(L["test_majority_rate"])
-    V["p_uniform"] = f"{L['binomtest_vs_uniform_p']:.3f}"
-    V["p_major"] = f"{L['binomtest_vs_majority_p']:.2f}"
+    V["tfidf_input_ci"] = f"[{pct(L['tfidf_input_ci95'][0])}, {pct(L['tfidf_input_ci95'][1])}]"
+    V["p_uniform"] = f"{L['tfidf_input_p_vs_uniform']:.3f}"
+    V["cnn_input_ci"], V["rnn_input_ci"] = ci(S["cnn_input_none"]["bootstrap"]), ci(S["rnn_input_none"]["bootstrap"])
+    V["cnn_input_p"] = f"{S['cnn_input_none']['bootstrap']['p_le_chance']:.3f}"
+    V["rnn_input_p"] = f"{S['rnn_input_none']['bootstrap']['p_le_chance']:.3f}"
+    V["meta_source_ci"] = f"[{pct(L['meta_source_ci95'][0])}, {pct(L['meta_source_ci95'][1])}]"
+    for k in ("no_bard", "within_sharegpt"):
+        q = L[f"input_only_{k}"]
+        V[f"io_{k}_acc"], V[f"io_{k}_chance"] = pct(q["acc"]), pct(q["chance"])
+        V[f"io_{k}_ci"] = f"[{pct(q['ci95'][0])}, {pct(q['ci95'][1])}]"
+        V[f"io_{k}_p"], V[f"io_{k}_n"] = f"{q['p_le_chance']:.2f}", f"{q['n_test']:,}"
     V["upper_bound"] = pct(L["test_input_only_upper_bound"])
     V["meta_source"] = pct(L["meta_source_acc"])
     V["meta_task"] = pct(L["meta_task_acc"])
@@ -102,28 +138,35 @@ def main():
                 continue
             ind = S[f"{m}_output_none"]["per_task_acc"][t]
             ho = S[k]
-            rq3_rows.append([t, m.upper() if m == "cnn" else "BiLSTM", ho["n_test"], pm(ind), pm(ho["accuracy"]),
-                             f"{100 * (ho['accuracy']['mean'] - ind['mean']):+.1f}",
+            sm = S[f"{m}_output_none_sizematch-{t}"]["per_task_acc"][t]
+            rq3_rows.append([t, m.upper() if m == "cnn" else "BiLSTM", ho["n_test"], pm(ind), pm(sm), pm(ho["accuracy"]),
+                             f"{100 * (ho['accuracy']['mean'] - sm['mean']):+.1f}",
                              f"{pm(ho['heldout_all_rows_accuracy'])} (n={ho['n_heldout_all_rows']:,})"])
+            V[f"rq3_{m}_{t}_sm"] = pm(sm)
+            V[f"rq3_{m}_{t}_drop_sm"] = f"{100 * (ho['accuracy']['mean'] - sm['mean']):+.1f}"
             V[f"rq3_{m}_{t}_in"], V[f"rq3_{m}_{t}_ho"] = pm(ind), pm(ho["accuracy"])
             V[f"rq3_{m}_{t}_drop"] = f"{100 * (ho['accuracy']['mean'] - ind['mean']):+.1f}"
             if m == "cnn":
                 fam_rows.append([t] + [pct(ho["heldout_all_rows_per_family_acc"][f]["mean"]) for f in FAMILIES])
-    V["rq3_table"] = md_table(["held-out task", "model", "n test", "in-domain acc", "held-out acc (same rows)", "Δ (pts)",
-                               "held-out acc, all rows of task"], rq3_rows) if rq3_rows else "_RQ3 runs missing_"
+    V["rq3_table"] = md_table(["held-out task", "model", "n test", "in-domain (full train)", "in-domain (size-matched)",
+                               "task held out", "Δ vs size-matched (pts)", "held out, all rows of task"], rq3_rows)
     V["rq3_family_table"] = md_table(["held-out task"] + FAMILIES, fam_rows) if fam_rows else ""
     if fam_rows:
         cnn_rows = [x for x in rq3_rows if x[1] == "CNN"]
         bar_figure("figures/rq3_heldout.png", [x[0] for x in cnn_rows],
-                   {"in-domain (CNN)": [S["cnn_output_none"]["per_task_acc"][x[0]]["mean"] for x in cnn_rows],
+                   {"in-domain, size-matched (CNN)": [S[f"cnn_output_none_sizematch-{x[0]}"]["per_task_acc"][x[0]]["mean"] for x in cnn_rows],
                     "task held out (CNN)": [S[f"cnn_output_none_holdout-{x[0]}"]["accuracy"]["mean"] for x in cnn_rows]},
-                   "test accuracy", "RQ3: leave-one-task-out vs in-domain", chance=0.2)
-        drops = {t: S[f"cnn_output_none_holdout-{t}"]["accuracy"]["mean"] - S["cnn_output_none"]["per_task_acc"][t]["mean"] for t in TASKS if f"cnn_output_none_holdout-{t}" in S}
+                   "test accuracy", "RQ3: task held out vs size-matched in-domain", chance=0.2,
+                   errs={"in-domain, size-matched (CNN)": [S[f"cnn_output_none_sizematch-{x[0]}"]["per_task_acc"][x[0]]["std"] for x in cnn_rows],
+                         "task held out (CNN)": [S[f"cnn_output_none_holdout-{x[0]}"]["accuracy"]["std"] for x in cnn_rows]})
+        drops = {t: S[f"cnn_output_none_holdout-{t}"]["accuracy"]["mean"] - S[f"cnn_output_none_sizematch-{t}"]["per_task_acc"][t]["mean"] for t in TASKS}
         V["rq3_mean_drop"] = f"{100 * sum(drops.values()) / len(drops):+.1f}"
         V["rq3_worst"] = min(drops, key=drops.get)
         V["rq3_worst_drop"] = f"{100 * drops[V['rq3_worst']]:+.1f}"
         V["rq3_best"] = max(drops, key=drops.get)
         V["rq3_best_drop"] = f"{100 * drops[V['rq3_best']]:+.1f}"
+        hos = [S[f"cnn_output_none_holdout-{t}"]["accuracy"]["mean"] for t in TASKS]
+        V["rq3_ho_range"] = f"{pct(min(hos))}–{pct(max(hos))}"
         fam_mean = {f: sum(S[f"cnn_output_none_holdout-{t}"]["heldout_all_rows_per_family_acc"][f]["mean"] for t in drops) / len(drops) for f in FAMILIES}
         V["rq3_fam_mean"] = ", ".join(f"{f} {pct(v)}" for f, v in sorted(fam_mean.items(), key=lambda kv: -kv[1]))
 
@@ -157,9 +200,10 @@ def main():
     V["top_feats"] = ", ".join(f"`{k}` ({100 * v:.1f} pts)" for k, v in imp[:5])
     G = F["gboost_group_ablation"]
     V["rq4_group_table"] = md_table(
-        ["feature group", "# features", "acc. with this group only", "acc. without this group", "drop vs all features (pts)"],
+        ["feature group", "# features", "val acc, this group only", "val acc, without this group", "Δ vs all features (pts)"],
         [[g, len(F["feature_groups"][g]), pct(G[g]["acc_group_only"]), pct(G[g]["acc_without_group"]),
-          f"{100 * (G[g]['acc_without_group'] - F['gboost']['accuracy']):+.1f}"] for g in F["feature_groups"]])
+          f"{100 * (G[g]['acc_without_group'] - F['gboost_val_acc']):+.1f}"] for g in F["feature_groups"]])
+    V["feat_gb_val"] = pct(F["gboost_val_acc"])
     abl_rows = []
     for m, name in (("cnn", "CNN"), ("rnn", "BiLSTM")):
         base = S[f"{m}_output_none"]["accuracy"]
@@ -171,53 +215,11 @@ def main():
                 abl_rows.append([name, desc, pm(S[k]["accuracy"]), f"{100 * d:+.1f}"])
                 V[f"abl_{m}_{a}"], V[f"abl_{m}_{a}_d"] = pm(S[k]["accuracy"]), f"{100 * d:+.1f}"
     V["rq4_abl_table"] = md_table(["model", "ablation", "test acc (%)", "Δ vs full (pts)"], abl_rows)
+    for m in ("cnn", "rnn"):
+        V[f"abl_{m}_len_iso"] = f"{100 * (S[f'{m}_output_no_length']['accuracy']['mean'] - S[f'{m}_output_window64']['accuracy']['mean']):+.1f}"
 
-    # ------------------------------------------------------------------ narrative text (numbers from V / S)
-    ho = lambda t, f: pct(S[f"cnn_output_none_holdout-{t}"]["heldout_all_rows_per_family_acc"][f]["mean"], 0)
-    V["rq3_text"] = f"""**(i) Does performance drop on unseen tasks? Yes, but only moderately.** Averaged over the six tasks, holding the task out changes CNN accuracy on that task by {V['rq3_mean_drop']} points. The largest drop is on *{V['rq3_worst']}* ({V['rq3_worst_drop']}); the smallest change is on *{V['rq3_best']}* ({V['rq3_best_drop']}). Every held-out accuracy (55–63%) stays far above chance (20%). For the two required cases: trained without writing, the CNN reaches {V['rq3_cnn_writing_ho']}% on writing prompts vs {V['rq3_cnn_writing_in']}% in-domain ({V['rq3_cnn_writing_drop']} pts). Trained without coding, it reaches {V['rq3_cnn_coding_ho']}% vs {V['rq3_cnn_coding_in']}% ({V['rq3_cnn_coding_drop']} pts). The BiLSTM shows the same pattern: writing {V['rq3_rnn_writing_ho']}% vs {V['rq3_rnn_writing_in']}%, coding {V['rq3_rnn_coding_ho']}% vs {V['rq3_rnn_coding_in']}%. Two caveats. The per-task test sets are small (112–757 rows), so seed standard deviations of 2–4 points mean the smaller differences are within noise. And held-out models also train on somewhat less data.
-
-**(ii) Are some families more consistently identifiable? Yes.** On every unseen task, **LLaMA-2** stays at or near the top (held-out recall between {ho('writing', 'LLaMA-2')}% on writing and {ho('factual_qa', 'LLaMA-2')}% on factual QA). Its signature is task-independent: chatty openings ("Sure, I'd be happy to help", "Hello! I'm here to...") and safety caveats. **Bard** is also robust ({ho('writing', 'Bard')}% on unseen writing) *except on coding* ({ho('coding', 'Bard')}%), where its usual bullet-and-bold layout gives way to code. **GPT** is the least stable: {ho('factual_qa', 'GPT')}% on unseen factual QA, where its short, plain answers look like Falcon or MPT. **MPT** is weak on most tasks ({ho('chat', 'MPT')}% on chat, {ho('factual_qa', 'MPT')}% on factual QA) and only does well on coding ({ho('coding', 'MPT')}%).
-
-**(iii) General fingerprint or task-specific patterns? Mostly general, partly task-specific.** Most of the in-domain accuracy survives without any example of the target task, so the models do learn a family style that transfers. The moderate drops, and the family-specific collapses (Bard on coding, GPT on factual QA), show that part of what is learned is "how family X answers task Y". Section 4 (RQ4) points to formatting and length habits; these are strongly task-dependent (code blocks, lists), which explains why they transfer imperfectly."""
-
-    V["rq4_text"] = f"""**(i) What signals do the classifiers use?** The descriptive statistics show clear, human-readable differences:
-
-- **Bard** writes the longest answers and is the heaviest markdown user: bullets in {pct(P['Bard']['pct_with_bullets'], 0)}% and **bold** in {pct(P['Bard']['pct_with_bold'], 0)}% of responses. It typically opens with "Sure, here is...".
-- **GPT** prefers numbered lists ({pct(P['GPT']['pct_with_numbered'], 0)}%), uses the most commas and the longest words; its most frequent opening, "As an AI...", appears in only {pct(P['GPT']['top_openings'][0][2])}% of answers, so GPT has no single signature opener.
-- **LLaMA-2** is the most conversational: {pct(P['LLaMA-2']['pct_opens_sure'], 0)}% of answers open with "Sure"/"Of course", {pct(P['LLaMA-2']['pct_opens_hello'], 0)}% with "Hello", and it uses the most exclamation marks and first-person pronouns.
-- **Falcon** writes the shortest answers (median {P['Falcon']['median_words']:.0f} words) with almost no markdown, and is the family most likely to mention being an "AI language model" ({pct(P['Falcon']['pct_mentions_ai_model'], 0)}%).
-- **MPT** sits in the middle on almost every statistic, which matches it being the hardest family to classify.
-
-**(ii) Linguistic, structural, or both? Both, with structure slightly ahead.** With hand-crafted features only, the markdown group alone is the strongest single group ({pct(G['markdown']['acc_group_only'])}%), and removing it hurts most ({100 * (G['markdown']['acc_without_group'] - F['gboost']['accuracy']):+.1f} pts). Lexical and punctuation features are close behind ({pct(G['lexical']['acc_group_only'])}% and {pct(G['punctuation']['acc_group_only'])}% alone), so no single group explains the families. The single most important feature is the fraction of blank lines, a pure layout signal. That features with no word identities reach {V['feat_gb']}%, above our BiLSTM, shows how much of the "fingerprint" is style rather than content.
-
-**(iii) Does removing signals hurt the neural models?** Yes. Every ablation costs the CNN between {min(-float(V['abl_cnn_no_length_d']), -float(V['abl_cnn_no_format_d']), -float(V['abl_cnn_lower_nopunct_d'])):.1f} and {max(-float(V['abl_cnn_no_length_d']), -float(V['abl_cnn_no_format_d']), -float(V['abl_cnn_lower_nopunct_d'])):.1f} points:
-
-- *Stripping markdown and line breaks:* {V['abl_cnn_no_format_d']} pts.
-- *Lowercasing and removing punctuation:* {V['abl_cnn_lower_nopunct_d']} pts, the largest drop. This transformation also collapses line breaks, so it removes formatting too.
-- *Removing length:* {V['abl_cnn_no_length_d']} pts. Caveat: this ablation also cuts the input from 256 to 64 tokens, so it mixes "no length information" with "less text".
-
-The BiLSTM loses less ({V['abl_rnn_no_format_d']}, {V['abl_rnn_lower_nopunct_d']}, {V['abl_rnn_no_length_d']} pts), consistent with it exploiting surface formatting less effectively in the first place. Even after these surface cues are removed, both models stay far above chance (56–60%). The remaining signal is lexical: word choice, stock phrases and register."""
-
-    V["lessons_text"] = f"""**What worked.**
-
-- *Simple models are strong here.* A CNN with three kernel sizes is better than a BiLSTM ({V['cnn_acc']}% vs {V['rnn_acc']}%) and 2.5× faster on CPU. Local n-gram patterns such as openings, list markers and stock phrases are exactly what convolutions with max-pooling detect, while the BiLSTM must carry them through a long sequence.
-- *Baselines keep you honest.* TF-IDF + logistic regression ({V['tfidf_out']}%) beats both neural models. It sees the *whole* response, whereas our models see only the first 256 tokens, and the median Bard or GPT response is close to or above that length once punctuation tokens are counted. It also does not have to learn embeddings from only 16k training examples. A pretrained encoder, longer inputs or more epochs would be the obvious next steps; both neural models were still improving when they hit the 6-epoch cap.
-- *Grouped splitting and leakage checks matter.* Splitting by prompt, and checking input-only accuracy against a source-only classifier, let us state with evidence that our RQ2 result is not inflated by prompt leakage.
-
-**What went wrong and what we would do differently.**
-
-- *Compute planning.* Our first BiLSTM took more than 10 min per epoch on a laptop CPU. We benchmarked and found sequence packing was 3× slower than masked pooling, and halved the hidden size. Profiling before launching a grid would have saved an hour.
-- *Process hygiene.* Killing the Python workers but not the job queue left stale runs that silently overwrote four result files. We caught it because every result JSON stores its full configuration, and we validate those configurations before aggregating. We recommend this practice.
-- *Cluster use.* Our first GPU jobs on the university cluster (ICDS Roar Collab) crashed. Falling back to CPU array jobs, one run per array task, finished the 42 RQ3/RQ4 runs in about 20 minutes, versus an estimated 2 hours on the laptop. Making every run resumable (skip if the result exists) made the mixed laptop/cluster workflow safe.
-
-**Limitations.**
-
-- *Dataset age and scope:* UltraFeedback responses come from 2023 models (GPT-3.5/4, Bard, LLaMA-2, Falcon, MPT). Today's Gemini, Claude, Qwen and DeepSeek are not covered, and fingerprints probably change with every model version.
-- *System prompts:* UltraFeedback generated each response under one of several "principle" system prompts, which shift style for every model.
-- *Family grouping:* merging gpt-3.5-turbo with gpt-4 and three LLaMA-2 sizes into one family hides within-family variation. Dropping the LLaMA fine-tunes (Vicuna, WizardLM, ...) avoids, but does not resolve, the question of what a "family" is.
-- *Balance:* classes are balanced by downsampling, but tasks and sources are not balanced within classes (e.g. Bard has no FLAN-NIv2 data). Task labels come from keyword rules and are noisy.
-- *Statistics:* most configurations use 3 seeds, so the reported standard deviations are rough, and per-task test sets are small.
-- *Hardware:* RQ1/RQ2 ran on a laptop CPU; RQ3/RQ4 ran on cluster CPUs, plus one GPU run. Two CNN runs repeated on the laptop reproduced their test accuracy exactly, but we did not check whether results are identical across different machines, and GPU kernels are not bit-deterministic."""
+    from report_text import narrative
+    V.update(narrative(V, S, F, P, G, L, T))
 
     for k in ("rq3_text", "rq4_text", "lessons_text"):
         V.setdefault(k, "_(pending)_")

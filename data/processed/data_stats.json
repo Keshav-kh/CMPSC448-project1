@@ -21,6 +21,10 @@
     "pythia-12b": 834
   },
   "after_family_filter": 124531,
+  "artifact_rows_removed_tokens_by_family": {
+    "Falcon": 1063,
+    "GPT": 1
+  },
   "after_drop_empty": 124429,
   "after_dedup_response": 121784,
   "after_dedup_prompt_model": 121765,

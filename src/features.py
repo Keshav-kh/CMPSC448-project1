@@ -130,7 +130,9 @@ def main():
     out["logreg"] = compute_metrics(te.label.values, lr.predict(Xte), tasks=te.task.values)
     gb = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.08, random_state=0).fit(Xtr, tr.label)
     out["gboost"] = compute_metrics(te.label.values, gb.predict(Xte), tasks=te.task.values)
-    pi = permutation_importance(gb, Xte, te.label.values, n_repeats=5, random_state=0, scoring="accuracy")
+    out["gboost_val_acc"] = float((gb.predict(va[FEATURES].values) == va.label.values).mean())
+    out["analysis_split"] = "permutation importance and group ablations use the validation split; test is scored once"
+    pi = permutation_importance(gb, va[FEATURES].values, va.label.values, n_repeats=5, random_state=0, scoring="accuracy")
     out["gboost_permutation_importance"] = dict(sorted(
         {f: float(m) for f, m in zip(FEATURES, pi.importances_mean)}.items(), key=lambda kv: -kv[1]))
     # group importance: drop a whole feature group and retrain
@@ -138,9 +140,9 @@ def main():
     for gname, cols in FEATURE_GROUPS.items():
         keep = [f for f in FEATURES if f not in cols]
         m = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.08, random_state=0).fit(tr[keep].values, tr.label)
-        grp[gname] = {"acc_without_group": float((m.predict(te[keep].values) == te.label.values).mean())}
+        grp[gname] = {"acc_without_group": float((m.predict(va[keep].values) == va.label.values).mean())}
         m2 = HistGradientBoostingClassifier(max_iter=300, learning_rate=0.08, random_state=0).fit(tr[cols].values, tr.label)
-        grp[gname]["acc_group_only"] = float((m2.predict(te[cols].values) == te.label.values).mean())
+        grp[gname]["acc_group_only"] = float((m2.predict(va[cols].values) == va.label.values).mean())
     out["gboost_group_ablation"] = grp
     coefs = lr[-1].coef_
     out["logreg_top_coefs"] = {
@@ -174,7 +176,7 @@ def main():
     imp = list(out["gboost_permutation_importance"].items())[:15][::-1]
     fig, ax = plt.subplots(figsize=(5.5, 4))
     ax.barh([k for k, _ in imp], [v for _, v in imp])
-    ax.set_xlabel("drop in test accuracy when permuted")
+    ax.set_xlabel("drop in validation accuracy when permuted")
     ax.set_title("Gradient boosting: permutation importance")
     fig.tight_layout(); fig.savefig("figures/rq4_importance.png", dpi=150); plt.close(fig)
 

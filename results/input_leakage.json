@@ -6,15 +6,49 @@
  "n_prompts_multi_family": 1880,
  "rows_whose_prompt_has_multi_family": 3865,
  "test_input_only_upper_bound": 0.9091365461847389,
- "tfidf_input_acc": 0.2213855421686747,
- "binomtest_vs_uniform_p": 0.00979883126535904,
- "binomtest_vs_majority_p": 0.6348547047816588,
+ "tfidf_input_acc": 0.21937751004016065,
+ "tfidf_input_ci95": [
+  0.2016955443228268,
+  0.23709273182957394
+ ],
+ "tfidf_input_p_vs_uniform": 0.014,
  "meta_source_acc": 0.28062248995983935,
- "meta_source_macro_f1": 0.20036559686928063,
+ "meta_source_ci95": [
+  0.2621938876271354,
+  0.29879507541704126
+ ],
  "meta_task_acc": 0.21887550200803213,
- "meta_task_macro_f1": 0.1397130559126384,
+ "meta_task_ci95": [
+  0.20141191261774255,
+  0.23677584976797061
+ ],
  "meta_prompt_length_acc": 0.19528112449799198,
- "meta_prompt_length_macro_f1": 0.12729120382478637,
+ "meta_prompt_length_ci95": [
+  0.1794865403788634,
+  0.21305689632372388
+ ],
+ "input_only_no_bard": {
+  "acc": 0.2541640962368908,
+  "ci95": [
+   0.23291882412371845,
+   0.27663747669323974
+  ],
+  "p_le_chance": 0.3485,
+  "chance": 0.25,
+  "majority_rate": 0.2757557063541024,
+  "n_test": 1621
+ },
+ "input_only_within_sharegpt": {
+  "acc": 0.21583850931677018,
+  "ci95": [
+   0.1848328353595714,
+   0.2492264380462773
+  ],
+  "p_le_chance": 0.1685,
+  "chance": 0.2,
+  "majority_rate": 0.2748447204968944,
+  "n_test": 644
+ },
  "source_by_family_test": {
   "evol_instruct": {
    "Bard": 101,
