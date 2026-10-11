@@ -1,0 +1,90 @@
+{
+ "chance_uniform": 0.2,
+ "test_majority_class": "GPT",
+ "test_majority_rate": 0.22439759036144577,
+ "n_prompts": 17899,
+ "n_prompts_multi_family": 1880,
+ "rows_whose_prompt_has_multi_family": 3865,
+ "test_input_only_upper_bound": 0.9091365461847389,
+ "tfidf_input_acc": 0.2213855421686747,
+ "binomtest_vs_uniform_p": 0.00979883126535904,
+ "binomtest_vs_majority_p": 0.6348547047816588,
+ "meta_source_acc": 0.28062248995983935,
+ "meta_source_macro_f1": 0.20036559686928063,
+ "meta_task_acc": 0.21887550200803213,
+ "meta_task_macro_f1": 0.1397130559126384,
+ "meta_prompt_length_acc": 0.19528112449799198,
+ "meta_prompt_length_macro_f1": 0.12729120382478637,
+ "source_by_family_test": {
+  "evol_instruct": {
+   "Bard": 101,
+   "Falcon": 67,
+   "GPT": 60,
+   "LLaMA-2": 70,
+   "MPT": 62
+  },
+  "false_qa": {
+   "Bard": 25,
+   "Falcon": 7,
+   "GPT": 23,
+   "LLaMA-2": 16,
+   "MPT": 10
+  },
+  "flan_v2_cot": {
+   "Bard": 37,
+   "Falcon": 23,
+   "GPT": 16,
+   "LLaMA-2": 14,
+   "MPT": 11
+  },
+  "flan_v2_flan2021": {
+   "Bard": 0,
+   "Falcon": 2,
+   "GPT": 3,
+   "LLaMA-2": 2,
+   "MPT": 2
+  },
+  "flan_v2_niv2": {
+   "Bard": 0,
+   "Falcon": 81,
+   "GPT": 66,
+   "LLaMA-2": 86,
+   "MPT": 90
+  },
+  "flan_v2_p3": {
+   "Bard": 0,
+   "Falcon": 16,
+   "GPT": 10,
+   "LLaMA-2": 9,
+   "MPT": 11
+  },
+  "sharegpt": {
+   "Bard": 87,
+   "Falcon": 127,
+   "GPT": 177,
+   "LLaMA-2": 123,
+   "MPT": 130
+  },
+  "truthful_qa": {
+   "Bard": 12,
+   "Falcon": 5,
+   "GPT": 4,
+   "LLaMA-2": 3,
+   "MPT": 7
+  },
+  "ultrachat": {
+   "Bard": 109,
+   "Falcon": 66,
+   "GPT": 88,
+   "LLaMA-2": 65,
+   "MPT": 69
+  }
+ },
+ "median_prompt_words_by_family": {
+  "Bard": 36.0,
+  "Falcon": 52.5,
+  "GPT": 42.0,
+  "LLaMA-2": 56.5,
+  "MPT": 53.0
+ }
+}

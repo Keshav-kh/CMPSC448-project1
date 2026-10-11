@@ -1,0 +1,858 @@
+{
+ "per_family": {
+  "Bard": {
+   "median_words": 255.0,
+   "mean_words": 271.0655,
+   "ttr_first100": 0.6165470908825323,
+   "mean_word_len": 4.723275558503493,
+   "pct_with_bullets": 0.37175,
+   "pct_with_numbered": 0.1205,
+   "pct_with_headers": 0.0445,
+   "pct_with_code_block": 0.1175,
+   "pct_with_bold": 0.20975,
+   "commas_per_100w": 5.053314964712749,
+   "exclam_per_100w": 0.12569954540998246,
+   "pct_opens_sure": 0.162,
+   "pct_opens_hello": 0.00425,
+   "pct_opens_as_ai": 0.00125,
+   "pct_mentions_ai_model": 0.0065,
+   "frac_first_person": 0.008706233124723189,
+   "top_openings": [
+    [
+     "sure, here is",
+     206,
+     0.0515
+    ],
+    [
+     "sure, i can",
+     133,
+     0.03325
+    ],
+    [
+     "here is a",
+     102,
+     0.0255
+    ],
+    [
+     "sure, here are",
+     101,
+     0.02525
+    ],
+    [
+     "here are some",
+     97,
+     0.02425
+    ]
+   ]
+  },
+  "Falcon": {
+   "median_words": 64.0,
+   "mean_words": 101.6925,
+   "ttr_first100": 0.7587832402831051,
+   "mean_word_len": 4.897164292215865,
+   "pct_with_bullets": 0.042,
+   "pct_with_numbered": 0.12425,
+   "pct_with_headers": 0.0125,
+   "pct_with_code_block": 0.051,
+   "pct_with_bold": 0.0025,
+   "commas_per_100w": 6.4269882664064655,
+   "exclam_per_100w": 0.3690939945440386,
+   "pct_opens_sure": 0.05625,
+   "pct_opens_hello": 0.01475,
+   "pct_opens_as_ai": 0.029,
+   "pct_mentions_ai_model": 0.1,
+   "frac_first_person": 0.019452656652561445,
+   "top_openings": [
+    [
+     "as an ai",
+     107,
+     0.02675
+    ],
+    [
+     "i'm sorry, i",
+     58,
+     0.0145
+    ],
+    [
+     "thank you for",
+     58,
+     0.0145
+    ],
+    [
+     "i'm sorry, but",
+     55,
+     0.01375
+    ],
+    [
+     "here are some",
+     50,
+     0.0125
+    ]
+   ]
+  },
+  "GPT": {
+   "median_words": 209.0,
+   "mean_words": 223.9765,
+   "ttr_first100": 0.710526594193236,
+   "mean_word_len": 5.133004202661344,
+   "pct_with_bullets": 0.0895,
+   "pct_with_numbered": 0.418,
+   "pct_with_headers": 0.033,
+   "pct_with_code_block": 0.14875,
+   "pct_with_bold": 0.03625,
+   "commas_per_100w": 8.781568788126753,
+   "exclam_per_100w": 0.18859465226209543,
+   "pct_opens_sure": 0.04825,
+   "pct_opens_hello": 0.00475,
+   "pct_opens_as_ai": 0.0335,
+   "pct_mentions_ai_model": 0.04825,
+   "frac_first_person": 0.0075344794456211695,
+   "top_openings": [
+    [
+     "as an ai",
+     89,
+     0.02225
+    ],
+    [
+     "as an ai,",
+     43,
+     0.01075
+    ],
+    [
+     "to create a",
+     40,
+     0.01
+    ],
+    [
+     "based on the",
+     34,
+     0.0085
+    ],
+    [
+     "yes, i understand",
+     21,
+     0.00525
+    ]
+   ]
+  },
+  "LLaMA-2": {
+   "median_words": 195.0,
+   "mean_words": 237.6865,
+   "ttr_first100": 0.6776785644724571,
+   "mean_word_len": 4.917197041433607,
+   "pct_with_bullets": 0.083,
+   "pct_with_numbered": 0.28925,
+   "pct_with_headers": 0.0185,
+   "pct_with_code_block": 0.0605,
+   "pct_with_bold": 0.00875,
+   "commas_per_100w": 5.959937626116037,
+   "exclam_per_100w": 0.7983751721063496,
+   "pct_opens_sure": 0.30975,
+   "pct_opens_hello": 0.169,
+   "pct_opens_as_ai": 0.02875,
+   "pct_mentions_ai_model": 0.034,
+   "frac_first_person": 0.0226431267202781,
+   "top_openings": [
+    [
+     "sure, i'd be",
+     515,
+     0.12875
+    ],
+    [
+     "thank you for",
+     380,
+     0.095
+    ],
+    [
+     "hello! i'm here",
+     335,
+     0.08375
+    ],
+    [
+     "i'm happy to",
+     115,
+     0.02875
+    ],
+    [
+     "of course, i'd",
+     104,
+     0.026
+    ]
+   ]
+  },
+  "MPT": {
+   "median_words": 151.0,
+   "mean_words": 187.092,
+   "ttr_first100": 0.667017376587856,
+   "mean_word_len": 4.9413881164165625,
+   "pct_with_bullets": 0.0745,
+   "pct_with_numbered": 0.25625,
+   "pct_with_headers": 0.02675,
+   "pct_with_code_block": 0.1305,
+   "pct_with_bold": 0.01475,
+   "commas_per_100w": 6.870347228891322,
+   "exclam_per_100w": 0.21117315625209804,
+   "pct_opens_sure": 0.1145,
+   "pct_opens_hello": 0.0065,
+   "pct_opens_as_ai": 0.002,
+   "pct_mentions_ai_model": 0.0035,
+   "frac_first_person": 0.007397882677471896,
+   "top_openings": [
+    [
+     "based on the",
+     61,
+     0.01525
+    ],
+    [
+     "sure, i can",
+     58,
+     0.0145
+    ],
+    [
+     "there are several",
+     51,
+     0.01275
+    ],
+    [
+     "yes, i can",
+     47,
+     0.01175
+    ],
+    [
+     "it is not",
+     36,
+     0.009
+    ]
+   ]
+  }
+ },
+ "vocab_jaccard_top1000": {
+  "Bard": {
+   "Bard": 1.0,
+   "Falcon": 0.6142050040355125,
+   "GPT": 0.6207455429497569,
+   "LLaMA-2": 0.6556291390728477,
+   "MPT": 0.6722408026755853
+  },
+  "Falcon": {
+   "Bard": 0.6142050040355125,
+   "Falcon": 1.0,
+   "GPT": 0.6638935108153078,
+   "LLaMA-2": 0.6863406408094435,
+   "MPT": 0.6877637130801688
+  },
+  "GPT": {
+   "Bard": 0.6207455429497569,
+   "Falcon": 0.6638935108153078,
+   "GPT": 1.0,
+   "LLaMA-2": 0.6792611251049538,
+   "MPT": 0.7316017316017316
+  },
+  "LLaMA-2": {
+   "Bard": 0.6556291390728477,
+   "Falcon": 0.6863406408094435,
+   "GPT": 0.6792611251049538,
+   "LLaMA-2": 1.0,
+   "MPT": 0.725625539257981
+  },
+  "MPT": {
+   "Bard": 0.6722408026755853,
+   "Falcon": 0.6877637130801688,
+   "GPT": 0.7316017316017316,
+   "LLaMA-2": 0.725625539257981,
+   "MPT": 1.0
+  }
+ },
+ "vocab_unique_top1000": {
+  "Bard": [
+   "affect",
+   "affordable",
+   "afraid",
+   "again",
+   "already",
+   "animal",
+   "author",
+   "aware",
+   "bar",
+   "beautiful",
+   "block",
+   "blood",
+   "brown",
+   "buy",
+   "camera",
+   "cancer",
+   "carefully",
+   "caused",
+   "century",
+   "cities",
+   "collect",
+   "confident",
+   "construction",
+   "cup",
+   "dance",
+   "dark",
+   "death",
+   "didn't",
+   "difference",
+   "diseases",
+   "doctor",
+   "dog",
+   "doing",
+   "drink",
+   "earth",
+   "eat",
+   "entailed",
+   "ever",
+   "everyone",
+   "film"
+  ],
+  "Falcon": [
+   "''",
+   "advice",
+   "assistant's",
+   "behind",
+   "capabilities",
+   "card",
+   "category",
+   "char",
+   "checking",
+   "compare",
+   "consequences",
+   "csv",
+   "destination",
+   "df",
+   "dialogue",
+   "docker",
+   "documents",
+   "effect",
+   "en",
+   "equation",
+   "err",
+   "errors",
+   "express",
+   "filter",
+   "finding",
+   "followed",
+   "follows",
+   "grammar",
+   "gt",
+   "identifying",
+   "img",
+   "incorporate",
+   "inputs",
+   "interaction",
+   "internet",
+   "involve",
+   "label",
+   "latest",
+   "link",
+   "lt"
+  ],
+  "GPT": [
+   "actual",
+   "adapt",
+   "adjust",
+   "al",
+   "analytics",
+   "ancient",
+   "apply",
+   "arr",
+   "articles",
+   "aspects",
+   "audio",
+   "aws",
+   "bash",
+   "collection",
+   "connections",
+   "consistent",
+   "consumption",
+   "core",
+   "db",
+   "differences",
+   "direct",
+   "directory",
+   "driven",
+   "establish",
+   "et",
+   "etc",
+   "excel",
+   "fashion",
+   "framework",
+   "functionality",
+   "handling",
+   "historical",
+   "income",
+   "incorporating",
+   "initial",
+   "innovation",
+   "innovative",
+   "integration",
+   "interactions",
+   "landscape"
+  ],
+  "LLaMA-2": [
+   "abilities",
+   "adding",
+   "alternative",
+   "apologize",
+   "assumptions",
+   "azure",
+   "beauty",
+   "beliefs",
+   "blue",
+   "clarification",
+   "clarify",
+   "classify",
+   "coherent",
+   "concept",
+   "contain",
+   "dangerous",
+   "diversity",
+   "doesn't",
+   "exploring",
+   "factually",
+   "focusing",
+   "glad",
+   "harm",
+   "harmful",
+   "hello",
+   "hesitate",
+   "honest",
+   "i'd",
+   "illegal",
+   "inclusive",
+   "inform",
+   "itself",
+   "manner",
+   "meaningful",
+   "microsoft",
+   "mindfulness",
+   "phrase",
+   "potentially",
+   "prime",
+   "principles"
+  ],
+  "MPT": [
+   "branch",
+   "campaigns",
+   "career",
+   "cell",
+   "changing",
+   "cleaning",
+   "cooking",
+   "creates",
+   "credit",
+   "demand",
+   "despite",
+   "diet",
+   "distribution",
+   "educational",
+   "effectiveness",
+   "emily",
+   "engineering",
+   "equal",
+   "focused",
+   "greater",
+   "hour",
+   "impacts",
+   "la",
+   "loop",
+   "miles",
+   "module",
+   "movement",
+   "outcomes",
+   "productivity",
+   "rating",
+   "reading",
+   "regulations",
+   "resulting",
+   "retrieve",
+   "rice",
+   "rights",
+   "shall",
+   "token",
+   "variables",
+   "views"
+  ]
+ },
+ "logreg": {
+  "accuracy": 0.5517068273092369,
+  "macro_f1": 0.5499971043820251,
+  "confusion_matrix": [
+   [
+    278,
+    17,
+    29,
+    18,
+    29
+   ],
+   [
+    20,
+    206,
+    64,
+    27,
+    77
+   ],
+   [
+    26,
+    92,
+    248,
+    32,
+    49
+   ],
+   [
+    42,
+    28,
+    47,
+    228,
+    43
+   ],
+   [
+    57,
+    62,
+    81,
+    53,
+    139
+   ]
+  ],
+  "per_family_acc": {
+   "Bard": 0.7493261455525606,
+   "Falcon": 0.5228426395939086,
+   "GPT": 0.5548098434004475,
+   "LLaMA-2": 0.5876288659793815,
+   "MPT": 0.35459183673469385
+  },
+  "per_family_f1": {
+   "Bard": 0.7002518891687658,
+   "Falcon": 0.5156445556946183,
+   "GPT": 0.5414847161572053,
+   "LLaMA-2": 0.6112600536193029,
+   "MPT": 0.3813443072702332
+  },
+  "n": 1992,
+  "per_task_acc": {
+   "chat": 0.6089828269484808,
+   "coding": 0.5481049562682215,
+   "factual_qa": 0.49107142857142855,
+   "math": 0.4685714285714286,
+   "nlp_task": 0.467966573816156,
+   "writing": 0.5894308943089431
+  },
+  "per_task_n": {
+   "chat": 757,
+   "coding": 343,
+   "factual_qa": 112,
+   "math": 175,
+   "nlp_task": 359,
+   "writing": 246
+  }
+ },
+ "gboost": {
+  "accuracy": 0.6822289156626506,
+  "macro_f1": 0.6831917416539934,
+  "confusion_matrix": [
+   [
+    299,
+    21,
+    21,
+    6,
+    24
+   ],
+   [
+    16,
+    265,
+    45,
+    20,
+    48
+   ],
+   [
+    12,
+    72,
+    294,
+    23,
+    46
+   ],
+   [
+    18,
+    16,
+    27,
+    298,
+    29
+   ],
+   [
+    42,
+    63,
+    57,
+    27,
+    203
+   ]
+  ],
+  "per_family_acc": {
+   "Bard": 0.8059299191374663,
+   "Falcon": 0.6725888324873096,
+   "GPT": 0.6577181208053692,
+   "LLaMA-2": 0.7680412371134021,
+   "MPT": 0.5178571428571429
+  },
+  "per_family_f1": {
+   "Bard": 0.7889182058047494,
+   "Falcon": 0.6377858002406739,
+   "GPT": 0.6599326599326599,
+   "LLaMA-2": 0.7821522309711286,
+   "MPT": 0.5471698113207547
+  },
+  "n": 1992,
+  "per_task_acc": {
+   "chat": 0.7371202113606341,
+   "coding": 0.717201166180758,
+   "factual_qa": 0.6071428571428571,
+   "math": 0.6114285714285714,
+   "nlp_task": 0.6155988857938719,
+   "writing": 0.6463414634146342
+  },
+  "per_task_n": {
+   "chat": 757,
+   "coding": 343,
+   "factual_qa": 112,
+   "math": 175,
+   "nlp_task": 359,
+   "writing": 246
+  }
+ },
+ "gboost_permutation_importance": {
+  "frac_blank_lines": 0.11817269076305226,
+  "frac_first_person": 0.052911646586345416,
+  "n_lines": 0.051204819277108474,
+  "exclam_pw": 0.03524096385542173,
+  "n_words": 0.02871485943775105,
+  "colon_pw": 0.027208835341365513,
+  "mean_word_len": 0.027108433734939808,
+  "frac_contractions": 0.026104417670682768,
+  "question_pw": 0.025903614457831382,
+  "numbered_lines": 0.025301204819277157,
+  "bullet_lines": 0.023995983935743002,
+  "dash_pw": 0.023493975903614527,
+  "ttr_first100": 0.02218875502008035,
+  "opens_sure": 0.01897590361445787,
+  "mean_sent_len": 0.01797188755020085,
+  "n_chars": 0.016164658634538198,
+  "frac_second_person": 0.013855421686747027,
+  "bold": 0.013654618473895642,
+  "mentions_ai_model": 0.012851405622490009,
+  "commas_pw": 0.011244979919678743,
+  "n_sentences": 0.010742971887550246,
+  "opens_restate": 0.009236947791164707,
+  "code_blocks": 0.007630522088353464,
+  "inline_code": 0.007028112449799262,
+  "non_ascii_pw": 0.0061244979919679475,
+  "frac_long_words": 0.006124497991967926,
+  "paren_pw": 0.0056224899598394055,
+  "quote_pw": 0.005522088353413701,
+  "opens_yes_no": 0.0023092369477911933,
+  "semicolon_pw": 0.002108433734939785,
+  "opens_hello": 0.001807228915662673,
+  "opens_as_ai": 0.001706827309236969,
+  "opens_sorry": 0.0008032128514056325,
+  "header_lines": -0.0008032128514055658
+ },
+ "gboost_group_ablation": {
+  "length": {
+   "acc_without_group": 0.6636546184738956,
+   "acc_group_only": 0.4146586345381526
+  },
+  "lexical": {
+   "acc_without_group": 0.6536144578313253,
+   "acc_group_only": 0.46987951807228917
+  },
+  "markdown": {
+   "acc_without_group": 0.6194779116465864,
+   "acc_group_only": 0.4789156626506024
+  },
+  "punctuation": {
+   "acc_without_group": 0.6365461847389559,
+   "acc_group_only": 0.46285140562248994
+  },
+  "opening": {
+   "acc_without_group": 0.6656626506024096,
+   "acc_group_only": 0.3629518072289157
+  }
+ },
+ "logreg_top_coefs": {
+  "Bard": [
+   [
+    "n_sentences",
+    1.8556561608263344
+   ],
+   [
+    "bold",
+    0.7222792116814585
+   ],
+   [
+    "bullet_lines",
+    0.59199357195935
+   ],
+   [
+    "frac_blank_lines",
+    0.5353943565044496
+   ],
+   [
+    "mean_sent_len",
+    0.5057963638004233
+   ],
+   [
+    "opens_restate",
+    0.3611531443130768
+   ]
+  ],
+  "Falcon": [
+   [
+    "dash_pw",
+    2.0016901664974327
+   ],
+   [
+    "non_ascii_pw",
+    0.9388152776268961
+   ],
+   [
+    "commas_pw",
+    0.5010003155052362
+   ],
+   [
+    "question_pw",
+    0.4500850209298918
+   ],
+   [
+    "n_words",
+    0.3906111445659259
+   ],
+   [
+    "mentions_ai_model",
+    0.3200258858927303
+   ]
+  ],
+  "GPT": [
+   [
+    "dash_pw",
+    2.252445345030646
+   ],
+   [
+    "non_ascii_pw",
+    1.1059175046893057
+   ],
+   [
+    "n_chars",
+    0.6027025345784032
+   ],
+   [
+    "ttr_first100",
+    0.5749022317198138
+   ],
+   [
+    "commas_pw",
+    0.43310637174128885
+   ],
+   [
+    "n_lines",
+    0.3837461738999284
+   ]
+  ],
+  "LLaMA-2": [
+   [
+    "n_chars",
+    1.2898040294128241
+   ],
+   [
+    "n_words",
+    0.8608116088105079
+   ],
+   [
+    "colon_pw",
+    0.5812762561393127
+   ],
+   [
+    "exclam_pw",
+    0.5666119743208932
+   ],
+   [
+    "opens_hello",
+    0.49150806983119616
+   ],
+   [
+    "opens_sure",
+    0.4125823148859406
+   ]
+  ],
+  "MPT": [
+   [
+    "dash_pw",
+    1.8705610974926121
+   ],
+   [
+    "non_ascii_pw",
+    1.3691603978851372
+   ],
+   [
+    "n_words",
+    1.2606527676717203
+   ],
+   [
+    "commas_pw",
+    0.46028216700423913
+   ],
+   [
+    "colon_pw",
+    0.38676291295220505
+   ],
+   [
+    "mean_word_len",
+    0.3180698191005196
+   ]
+  ]
+ },
+ "feature_groups": {
+  "length": [
+   "n_words",
+   "n_chars",
+   "n_sentences",
+   "n_lines"
+  ],
+  "lexical": [
+   "ttr_first100",
+   "mean_word_len",
+   "mean_sent_len",
+   "frac_long_words",
+   "frac_first_person",
+   "frac_second_person",
+   "frac_contractions"
+  ],
+  "markdown": [
+   "bullet_lines",
+   "numbered_lines",
+   "header_lines",
+   "code_blocks",
+   "bold",
+   "inline_code",
+   "frac_blank_lines"
+  ],
+  "punctuation": [
+   "commas_pw",
+   "exclam_pw",
+   "question_pw",
+   "colon_pw",
+   "semicolon_pw",
+   "paren_pw",
+   "dash_pw",
+   "quote_pw",
+   "non_ascii_pw"
+  ],
+  "opening": [
+   "opens_sure",
+   "opens_hello",
+   "opens_as_ai",
+   "opens_sorry",
+   "opens_yes_no",
+   "opens_restate",
+   "mentions_ai_model"
+  ]
+ }
+}
