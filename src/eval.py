@@ -104,7 +104,7 @@ def main():
     lines = ["| run | test acc (%) | macro-F1 (%) | seeds |", "|---|---|---|---|"]
     for key, s in summary.items():
         lines.append(f"| {key} | {fmt(s['accuracy'])} | {fmt(s['macro_f1'])} | {s['accuracy']['n_seeds']} |")
-    open("results/tables.md", "w").write("\n".join(lines) + "\n")
+    open("results/tables.md", "w", encoding="utf-8").write("\n".join(lines) + "\n")
     print("\n".join(lines))
 
 
