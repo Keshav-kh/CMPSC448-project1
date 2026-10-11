@@ -172,6 +172,53 @@ def main():
                 V[f"abl_{m}_{a}"], V[f"abl_{m}_{a}_d"] = pm(S[k]["accuracy"]), f"{100 * d:+.1f}"
     V["rq4_abl_table"] = md_table(["model", "ablation", "test acc (%)", "Δ vs full (pts)"], abl_rows)
 
+    # ------------------------------------------------------------------ narrative text (numbers from V / S)
+    ho = lambda t, f: pct(S[f"cnn_output_none_holdout-{t}"]["heldout_all_rows_per_family_acc"][f]["mean"], 0)
+    V["rq3_text"] = f"""**(i) Does performance drop on unseen tasks? Yes, but only moderately.** Averaged over the six tasks, holding the task out changes CNN accuracy on that task by {V['rq3_mean_drop']} points. The largest drop is on *{V['rq3_worst']}* ({V['rq3_worst_drop']}); the smallest change is on *{V['rq3_best']}* ({V['rq3_best_drop']}). Every held-out accuracy (55–63%) stays far above chance (20%). For the two required cases: trained without writing, the CNN reaches {V['rq3_cnn_writing_ho']}% on writing prompts vs {V['rq3_cnn_writing_in']}% in-domain ({V['rq3_cnn_writing_drop']} pts). Trained without coding, it reaches {V['rq3_cnn_coding_ho']}% vs {V['rq3_cnn_coding_in']}% ({V['rq3_cnn_coding_drop']} pts). The BiLSTM shows the same pattern: writing {V['rq3_rnn_writing_ho']}% vs {V['rq3_rnn_writing_in']}%, coding {V['rq3_rnn_coding_ho']}% vs {V['rq3_rnn_coding_in']}%. Two caveats. The per-task test sets are small (112–757 rows), so seed standard deviations of 2–4 points mean the smaller differences are within noise. And held-out models also train on somewhat less data.
+
+**(ii) Are some families more consistently identifiable? Yes.** On every unseen task, **LLaMA-2** stays at or near the top (held-out recall between {ho('writing', 'LLaMA-2')}% on writing and {ho('factual_qa', 'LLaMA-2')}% on factual QA). Its signature is task-independent: chatty openings ("Sure, I'd be happy to help", "Hello! I'm here to...") and safety caveats. **Bard** is also robust ({ho('writing', 'Bard')}% on unseen writing) *except on coding* ({ho('coding', 'Bard')}%), where its usual bullet-and-bold layout gives way to code. **GPT** is the least stable: {ho('factual_qa', 'GPT')}% on unseen factual QA, where its short, plain answers look like Falcon or MPT. **MPT** is weak on most tasks ({ho('chat', 'MPT')}% on chat, {ho('factual_qa', 'MPT')}% on factual QA) and only does well on coding ({ho('coding', 'MPT')}%).
+
+**(iii) General fingerprint or task-specific patterns? Mostly general, partly task-specific.** Most of the in-domain accuracy survives without any example of the target task, so the models do learn a family style that transfers. The moderate drops, and the family-specific collapses (Bard on coding, GPT on factual QA), show that part of what is learned is "how family X answers task Y". Section 4 (RQ4) points to formatting and length habits; these are strongly task-dependent (code blocks, lists), which explains why they transfer imperfectly."""
+
+    V["rq4_text"] = f"""**(i) What signals do the classifiers use?** The descriptive statistics show clear, human-readable differences:
+
+- **Bard** writes the longest answers and is the heaviest markdown user: bullets in {pct(P['Bard']['pct_with_bullets'], 0)}% and **bold** in {pct(P['Bard']['pct_with_bold'], 0)}% of responses. It typically opens with "Sure, here is...".
+- **GPT** prefers numbered lists ({pct(P['GPT']['pct_with_numbered'], 0)}%), uses the most commas and the longest words; its most frequent opening, "As an AI...", appears in only {pct(P['GPT']['top_openings'][0][2])}% of answers, so GPT has no single signature opener.
+- **LLaMA-2** is the most conversational: {pct(P['LLaMA-2']['pct_opens_sure'], 0)}% of answers open with "Sure"/"Of course", {pct(P['LLaMA-2']['pct_opens_hello'], 0)}% with "Hello", and it uses the most exclamation marks and first-person pronouns.
+- **Falcon** writes the shortest answers (median {P['Falcon']['median_words']:.0f} words) with almost no markdown, and is the family most likely to mention being an "AI language model" ({pct(P['Falcon']['pct_mentions_ai_model'], 0)}%).
+- **MPT** sits in the middle on almost every statistic, which matches it being the hardest family to classify.
+
+**(ii) Linguistic, structural, or both? Both, with structure slightly ahead.** With hand-crafted features only, the markdown group alone is the strongest single group ({pct(G['markdown']['acc_group_only'])}%), and removing it hurts most ({100 * (G['markdown']['acc_without_group'] - F['gboost']['accuracy']):+.1f} pts). Lexical and punctuation features are close behind ({pct(G['lexical']['acc_group_only'])}% and {pct(G['punctuation']['acc_group_only'])}% alone), so no single group explains the families. The single most important feature is the fraction of blank lines, a pure layout signal. That features with no word identities reach {V['feat_gb']}%, above our BiLSTM, shows how much of the "fingerprint" is style rather than content.
+
+**(iii) Does removing signals hurt the neural models?** Yes. Every ablation costs the CNN between {min(-float(V['abl_cnn_no_length_d']), -float(V['abl_cnn_no_format_d']), -float(V['abl_cnn_lower_nopunct_d'])):.1f} and {max(-float(V['abl_cnn_no_length_d']), -float(V['abl_cnn_no_format_d']), -float(V['abl_cnn_lower_nopunct_d'])):.1f} points:
+
+- *Stripping markdown and line breaks:* {V['abl_cnn_no_format_d']} pts.
+- *Lowercasing and removing punctuation:* {V['abl_cnn_lower_nopunct_d']} pts, the largest drop. This transformation also collapses line breaks, so it removes formatting too.
+- *Removing length:* {V['abl_cnn_no_length_d']} pts. Caveat: this ablation also cuts the input from 256 to 64 tokens, so it mixes "no length information" with "less text".
+
+The BiLSTM loses less ({V['abl_rnn_no_format_d']}, {V['abl_rnn_lower_nopunct_d']}, {V['abl_rnn_no_length_d']} pts), consistent with it exploiting surface formatting less effectively in the first place. Even after these surface cues are removed, both models stay far above chance (56–60%). The remaining signal is lexical: word choice, stock phrases and register."""
+
+    V["lessons_text"] = f"""**What worked.**
+
+- *Simple models are strong here.* A CNN with three kernel sizes is better than a BiLSTM ({V['cnn_acc']}% vs {V['rnn_acc']}%) and 2.5× faster on CPU. Local n-gram patterns such as openings, list markers and stock phrases are exactly what convolutions with max-pooling detect, while the BiLSTM must carry them through a long sequence.
+- *Baselines keep you honest.* TF-IDF + logistic regression ({V['tfidf_out']}%) beats both neural models. It sees the *whole* response, whereas our models see only the first 256 tokens, and the median Bard or GPT response is close to or above that length once punctuation tokens are counted. It also does not have to learn embeddings from only 16k training examples. A pretrained encoder, longer inputs or more epochs would be the obvious next steps; both neural models were still improving when they hit the 6-epoch cap.
+- *Grouped splitting and leakage checks matter.* Splitting by prompt, and checking input-only accuracy against a source-only classifier, let us state with evidence that our RQ2 result is not inflated by prompt leakage.
+
+**What went wrong and what we would do differently.**
+
+- *Compute planning.* Our first BiLSTM took more than 10 min per epoch on a laptop CPU. We benchmarked and found sequence packing was 3× slower than masked pooling, and halved the hidden size. Profiling before launching a grid would have saved an hour.
+- *Process hygiene.* Killing the Python workers but not the job queue left stale runs that silently overwrote four result files. We caught it because every result JSON stores its full configuration, and we validate those configurations before aggregating. We recommend this practice.
+- *Cluster use.* Our first GPU jobs on the university cluster (ICDS Roar Collab) crashed. Falling back to CPU array jobs, one run per array task, finished the 42 RQ3/RQ4 runs in about 20 minutes, versus an estimated 2 hours on the laptop. Making every run resumable (skip if the result exists) made the mixed laptop/cluster workflow safe.
+
+**Limitations.**
+
+- *Dataset age and scope:* UltraFeedback responses come from 2023 models (GPT-3.5/4, Bard, LLaMA-2, Falcon, MPT). Today's Gemini, Claude, Qwen and DeepSeek are not covered, and fingerprints probably change with every model version.
+- *System prompts:* UltraFeedback generated each response under one of several "principle" system prompts, which shift style for every model.
+- *Family grouping:* merging gpt-3.5-turbo with gpt-4 and three LLaMA-2 sizes into one family hides within-family variation. Dropping the LLaMA fine-tunes (Vicuna, WizardLM, ...) avoids, but does not resolve, the question of what a "family" is.
+- *Balance:* classes are balanced by downsampling, but tasks and sources are not balanced within classes (e.g. Bard has no FLAN-NIv2 data). Task labels come from keyword rules and are noisy.
+- *Statistics:* most configurations use 3 seeds, so the reported standard deviations are rough, and per-task test sets are small.
+- *Hardware:* RQ1/RQ2 ran on a laptop CPU; RQ3/RQ4 ran on cluster CPUs, plus one GPU run. Two CNN runs repeated on the laptop reproduced their test accuracy exactly, but we did not check whether results are identical across different machines, and GPU kernels are not bit-deterministic."""
+
     for k in ("rq3_text", "rq4_text", "lessons_text"):
         V.setdefault(k, "_(pending)_")
     tmpl = open("report_template.md", encoding="utf-8").read()

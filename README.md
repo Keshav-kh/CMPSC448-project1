@@ -37,3 +37,13 @@ Tested with Python 3.14, torch 2.9.1 (CPU only), scikit-learn 1.7.2, pandas 2.3.
 7. **Aggregate + report**: `python src/eval.py && python src/make_report.py`
 
 All runs use fixed seeds (1, 2, 3); data split seed is 448. Hardware: CPU only (16 logical cores), 4 runs in parallel x 4 threads.
+
+## Resuming and running on a cluster (ICDS Roar Collab)
+- `train.py` skips any run whose `results/runs/<name>.json` exists (`--force` to redo), so `bash scripts/resume_local.sh` resumes after an interruption.
+- On Roar Collab: copy the repo, create a conda env (`module load anaconda; conda create -n whowrote python=3.11; source activate whowrote; pip install -r requirements.txt`), then submit one array task per command line:
+  ```
+  sed '/--gpus=1/d' scripts/icds_array.slurm > scripts/icds_array_cpu.slurm   # CPU version (used for our runs)
+  sbatch --account=open --time=02:00:00 --array=1-24 scripts/icds_array_cpu.slurm scripts/rq3_cmds.txt
+  sbatch --account=open --time=02:00:00 --array=1-18 scripts/icds_array_cpu.slurm scripts/rq4_cmds.txt
+  ```
+  Copy `results/runs/*.json` back and run `python src/eval.py && python src/make_report.py`.
