@@ -52,11 +52,10 @@ In both cases there is no detectable input-only signal. The derived task label (
     # ------------------------------------------------------------------ RQ3
     ho = lambda t, f: pct(S[f"cnn_output_none_holdout-{t}"]["heldout_all_rows_per_family_acc"][f]["mean"], 0)
     llama = [S[f"cnn_output_none_holdout-{t}"]["heldout_all_rows_per_family_acc"]["LLaMA-2"]["mean"] for t in TASKS]
-    sm_coding_std = S["cnn_output_none_sizematch-coding"]["per_task_acc"]["coding"]["std"]
     out["rq3_text"] = f"""**(i) Does performance drop on unseen tasks? It depends strongly on the task.** Measured against the size-matched in-domain control, holding a task out changes CNN accuracy on that task by {V['rq3_mean_drop']} points on average. The changes range from {V['rq3_best_drop']} on *{V['rq3_best']}* to {V['rq3_worst_drop']} on *{V['rq3_worst']}*.
 
-- *Writing* (one of the two required cases) transfers essentially without loss: {V['rq3_cnn_writing_ho']}% held out vs {V['rq3_cnn_writing_sm']}% size-matched ({V['rq3_cnn_writing_drop_sm']} pts).
-- *Coding* is the clear exception: {V['rq3_cnn_coding_ho']}% vs {V['rq3_cnn_coding_sm']}% ({V['rq3_cnn_coding_drop_sm']} pts). The coding gap is several times the seed standard deviation (about {pct(sm_coding_std)} pts for the control), so it is not noise.
+- *Writing* (one of the two examples given in the assignment) transfers essentially without loss: {V['rq3_cnn_writing_ho']}% held out vs {V['rq3_cnn_writing_sm']}% size-matched ({V['rq3_cnn_writing_drop_sm']} pts).
+- *Coding* is the clear exception: {V['rq3_cnn_coding_ho']}% vs {V['rq3_cnn_coding_sm']}% ({V['rq3_cnn_coding_drop_sm']} pts). On coding the size-matched control even beats the full-train model ({V['rq3_cnn_coding_in']}%), so seed standard deviations understate run-to-run variation and the exact size of this gap is uncertain. Measured against the full-train model the drop is still {V['rq3_cnn_coding_drop']} pts, so a real coding drop remains either way.
 - *The BiLSTM shows a different ordering:* writing {V['rq3_rnn_writing_ho']}% vs {V['rq3_rnn_writing_sm']}% ({V['rq3_rnn_writing_drop_sm']} pts), coding {V['rq3_rnn_coding_ho']}% vs {V['rq3_rnn_coding_sm']}% ({V['rq3_rnn_coding_drop_sm']} pts). This is a warning not to over-read single task comparisons.
 
 Every held-out accuracy ({V['rq3_ho_range']}%) stays far above chance. Per-task test sets are small (112–757 rows) and seed standard deviations are 1–4 points, so differences of a couple of points are within noise. The task labels come from keyword rules, and sources are not balanced across tasks; both remain confounds.

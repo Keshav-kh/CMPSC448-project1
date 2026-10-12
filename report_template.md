@@ -37,6 +37,14 @@ We dropped third-party LLaMA fine-tunes (Vicuna, WizardLM, UltraLM, Alpaca): the
 
 {data_table}
 
+**Example.** One prompt from the training split, answered by two families. Each row is one (LLM_name, LLM_input, LLM_output) triple; the input is shared. Line breaks are shown as ¶.
+
+LLM_input: *"{example_prompt}"*
+
+{example_table}
+
+Both answers do the task, but Bard opens with "Sure. Here's...", uses blank lines and closes with a friendly sign-off, while MPT gives a single plain sentence. Signals like these are what our models pick up (RQ4).
+
 # 2. Models and training
 
 **Tokenisation and truncation.** We use a case-preserving regex tokenizer (`\n|\w+|[^\w\s]`). Every punctuation mark is its own token and newlines become a `<nl>` token, so formatting stays visible to the models. The vocabulary is built from the training split only (minimum frequency 2, capped at {vocab} entries, including `<pad>`, `<unk>` and `<sep>`). Sequences are truncated to **256 tokens**. This truncation is substantial and differs strongly by family: {trunc_all}% of all responses are cut off.
@@ -49,7 +57,9 @@ We dropped third-party LLaMA fine-tunes (Vicuna, WizardLM, UltraLM, Alpaca): the
 
 **RNN (BiLSTM).** Embedding (128-d), a bidirectional LSTM (64 hidden units per direction), then masked mean pooling and masked max pooling over time, concatenated (256-d), dropout 0.5 and a linear layer to 5 classes. The backward direction runs on each sequence reversed *within its own length*, so it never reads padding before real tokens. This is equivalent to packed sequences, but faster on our CPU: {bench_ours} s vs {bench_packed} s per batch of 64 × 256 tokens ({bench_speedup}× speed-up; `scripts/bench_lstm.py`). {rnn_params} parameters.
 
-**Training.** Adam (learning rate 1e-3), cross-entropy loss, batch size 64, gradient clipping at 5. Training batches are bucketed by length. We train for at most 6 epochs with early stopping on validation accuracy (patience 2) and restore the best-validation weights before testing. Every *neural* configuration is run with seeds 1, 2 and 3, and we report mean ± standard deviation over seeds. Confidence intervals come from a **prompt-cluster bootstrap** (2,000 resamples of test prompts, not rows, because rows that share a prompt are not independent). The TF-IDF and feature baselines are single deterministic runs. The best validation epochs for output-only RQ1 runs were {cnn_best_epochs} (CNN) and {rnn_best_epochs} (BiLSTM). Several models peaked in the last allowed epoch, so they are probably under-trained.
+**Training.** Adam (learning rate 1e-3), cross-entropy loss, batch size 64, gradient clipping at 5. Training batches are bucketed by length. We train for at most 6 epochs with early stopping on validation accuracy (patience 2) and restore the best-validation weights before testing. Every *neural* configuration is run with seeds 1, 2 and 3, and we report mean ± standard deviation over seeds. Confidence intervals come from a **prompt-cluster bootstrap** (2,000 resamples of test prompts, not rows, because rows that share a prompt are not independent). The TF-IDF and feature baselines are single deterministic runs. The best validation epochs for output-only RQ1 runs were {cnn_best_epochs} (CNN) and {rnn_best_epochs} (BiLSTM). Several models peaked in the last allowed epoch, so they are probably under-trained. The training curves below show this. Validation accuracy rises steeply in the first three to four epochs and then flattens, while training loss is still falling at epoch 6. More epochs would probably add a little accuracy, but the curves give no sign that they would close the gap between the CNN and the BiLSTM.
+
+![Training curves for the output-only runs (3 seeds per model): training loss (left) and validation accuracy (right) per epoch.](figures/training_curves.png){{width=85%}}
 
 **Hardware.** All {n_runs} neural runs were trained on CPU nodes of Penn State's ICDS Roar Collab cluster (one Slurm array task per run, 4 cores each; recorded devices: {devices}). The mean wall-clock time of one output-only run was {cnn_time} min (CNN) and {rnn_time} min (BiLSTM). Baselines and feature analyses ran on a laptop CPU.
 

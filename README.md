@@ -22,7 +22,7 @@ scripts/*.txt         exact command lists used for every experiment; scripts/run
 ```
 python -m pip install -r requirements.txt
 ```
-Tested with Python 3.14, torch 2.9.1 (CPU only), scikit-learn 1.7.2, pandas 2.3.3.
+Tested locally with Python 3.14, torch 2.9.1 (CPU only), scikit-learn 1.7.2, pandas 2.3.3; the ICDS runs used a Python 3.11 conda env.
 
 ## Reproduce
 One entry point runs everything (after `pip install -r requirements.txt`):

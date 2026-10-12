@@ -57,3 +57,26 @@ def bar_figure(path, labels, series, ylabel, title, errs=None, chance=None):
     fig.tight_layout()
     fig.savefig(path, dpi=150)
     plt.close(fig)
+
+
+def curve_figure(path, histories):
+    """Training loss and validation accuracy per epoch; one colour per model, one line per seed."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig, (ax_l, ax_a) = plt.subplots(1, 2, figsize=(7.2, 2.8))
+    for i, (name, runs) in enumerate(histories.items()):
+        for j, h in enumerate(runs):
+            ep = [e["epoch"] for e in h]
+            kw = dict(color=f"C{i}", marker="o", ms=3, lw=1, label=name if j == 0 else None)
+            ax_l.plot(ep, [e["train_loss"] for e in h], **kw)
+            ax_a.plot(ep, [e["val_acc"] for e in h], **kw)
+    ax_l.set_xlabel("epoch")
+    ax_l.set_ylabel("training loss")
+    ax_a.set_xlabel("epoch")
+    ax_a.set_ylabel("validation accuracy")
+    ax_a.legend(fontsize=7)
+    fig.tight_layout()
+    fig.savefig(path, dpi=150)
+    plt.close(fig)

@@ -9,8 +9,10 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from data import FAMILIES  # noqa: E402
-from report_tables import bar_figure, load, md_table, pct, pm  # noqa: E402
+import pandas as pd  # noqa: E402
+from report_tables import bar_figure, curve_figure, load, md_table, pct, pm  # noqa: E402
 
+EXAMPLE_PROMPT = "Construct a hyperbole that captures the color of the sunset."
 TASKS = ["writing", "coding", "chat", "math", "nlp_task", "factual_qa"]
 ABLATIONS = [("window64", "first 64 tokens only (control for no_length)"),
              ("no_length", "64-token window, short texts tiled (no length)"),
@@ -71,6 +73,16 @@ def main():
     V["rnn_time"] = f"{r['train_time_s']['mean'] / 60:.1f}"
     V["cnn_best_epochs"] = ", ".join(map(str, c["best_epoch"]))
     V["rnn_best_epochs"] = ", ".join(map(str, r["best_epoch"]))
+    curve_figure("figures/training_curves.png",
+                 {name: [load(f"runs/{m}_output_none_s{s}.json")["history"] for s in (1, 2, 3)]
+                  for m, name in (("cnn", "CNN"), ("rnn", "BiLSTM"))})
+
+    # ------------------------------------------------------------------ example triple
+    df = pd.read_parquet("data/processed/dataset.parquet")
+    ex = df[df.prompt == EXAMPLE_PROMPT].sort_values("family")
+    V["example_prompt"] = EXAMPLE_PROMPT
+    V["example_table"] = md_table(["LLM_name (family)", "LLM_output"],
+                                  [[f"{e.model} ({e.family})", e.response.replace("\n", " ¶ ")] for e in ex.itertuples()])
 
     # ------------------------------------------------------------------ RQ1
     V["rq1_table"] = md_table(

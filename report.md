@@ -48,6 +48,17 @@ We dropped third-party LLaMA fine-tunes (Vicuna, WizardLM, UltraLM, Alpaca): the
 | val | 1999 | 405 | 426 | 377 | 405 | 386 |
 | test | 1992 | 371 | 394 | 447 | 388 | 392 |
 
+**Example.** One prompt from the training split, answered by two families. Each row is one (LLM_name, LLM_input, LLM_output) triple; the input is shared. Line breaks are shown as ¶.
+
+LLM_input: *"Construct a hyperbole that captures the color of the sunset."*
+
+| LLM_name (family) | LLM_output |
+|---|---|
+| bard (Bard) | Sure. Here's a hyperbole that captures the color of the sunset: ¶  ¶ The sunset was so beautiful, it looked like someone had spilled a bucket of paint across the sky. ¶  ¶ I hope you like it! |
+| mpt-30b-chat (MPT) | The sunset was a fiery explosion of colors that could make the world melt. |
+
+Both answers do the task, but Bard opens with "Sure. Here's...", uses blank lines and closes with a friendly sign-off, while MPT gives a single plain sentence. Signals like these are what our models pick up (RQ4).
+
 # 2. Models and training
 
 **Tokenisation and truncation.** We use a case-preserving regex tokenizer (`\n|\w+|[^\w\s]`). Every punctuation mark is its own token and newlines become a `<nl>` token, so formatting stays visible to the models. The vocabulary is built from the training split only (minimum frequency 2, capped at 30,003 entries, including `<pad>`, `<unk>` and `<sep>`). Sequences are truncated to **256 tokens**. This truncation is substantial and differs strongly by family: 45.1% of all responses are cut off.
@@ -64,7 +75,9 @@ We dropped third-party LLaMA fine-tunes (Vicuna, WizardLM, UltraLM, Alpaca): the
 
 **RNN (BiLSTM).** Embedding (128-d), a bidirectional LSTM (64 hidden units per direction), then masked mean pooling and masked max pooling over time, concatenated (256-d), dropout 0.5 and a linear layer to 5 classes. The backward direction runs on each sequence reversed *within its own length*, so it never reads padding before real tokens. This is equivalent to packed sequences, but faster on our CPU: 0.093 s vs 0.326 s per batch of 64 × 256 tokens (3.5× speed-up; `scripts/bench_lstm.py`). 3,940,997 parameters.
 
-**Training.** Adam (learning rate 1e-3), cross-entropy loss, batch size 64, gradient clipping at 5. Training batches are bucketed by length. We train for at most 6 epochs with early stopping on validation accuracy (patience 2) and restore the best-validation weights before testing. Every *neural* configuration is run with seeds 1, 2 and 3, and we report mean ± standard deviation over seeds. Confidence intervals come from a **prompt-cluster bootstrap** (2,000 resamples of test prompts, not rows, because rows that share a prompt are not independent). The TF-IDF and feature baselines are single deterministic runs. The best validation epochs for output-only RQ1 runs were 6, 6, 5 (CNN) and 6, 6, 5 (BiLSTM). Several models peaked in the last allowed epoch, so they are probably under-trained.
+**Training.** Adam (learning rate 1e-3), cross-entropy loss, batch size 64, gradient clipping at 5. Training batches are bucketed by length. We train for at most 6 epochs with early stopping on validation accuracy (patience 2) and restore the best-validation weights before testing. Every *neural* configuration is run with seeds 1, 2 and 3, and we report mean ± standard deviation over seeds. Confidence intervals come from a **prompt-cluster bootstrap** (2,000 resamples of test prompts, not rows, because rows that share a prompt are not independent). The TF-IDF and feature baselines are single deterministic runs. The best validation epochs for output-only RQ1 runs were 6, 6, 5 (CNN) and 6, 6, 5 (BiLSTM). Several models peaked in the last allowed epoch, so they are probably under-trained. The training curves below show this. Validation accuracy rises steeply in the first three to four epochs and then flattens, while training loss is still falling at epoch 6. More epochs would probably add a little accuracy, but the curves give no sign that they would close the gap between the CNN and the BiLSTM.
+
+![Training curves for the output-only runs (3 seeds per model): training loss (left) and validation accuracy (right) per epoch.](figures/training_curves.png){width=85%}
 
 **Hardware.** All 96 neural runs were trained on CPU nodes of Penn State's ICDS Roar Collab cluster (one Slurm array task per run, 4 cores each; recorded devices: cpu). The mean wall-clock time of one output-only run was 1.9 min (CNN) and 2.5 min (BiLSTM). Baselines and feature analyses ran on a laptop CPU.
 
@@ -157,8 +170,8 @@ Per-family accuracy of the held-out CNN on all rows of the unseen task (mean of 
 
 **(i) Does performance drop on unseen tasks? It depends strongly on the task.** Measured against the size-matched in-domain control, holding a task out changes CNN accuracy on that task by -4.3 points on average. The changes range from +0.5 on *writing* to -12.2 on *coding*.
 
-- *Writing* (one of the two required cases) transfers essentially without loss: 57.0 ± 2.0% held out vs 56.5 ± 1.6% size-matched (+0.5 pts).
-- *Coding* is the clear exception: 61.4 ± 3.3% vs 73.7 ± 0.7% (-12.2 pts). The coding gap is several times the seed standard deviation (about 0.7 pts for the control), so it is not noise.
+- *Writing* (one of the two examples given in the assignment) transfers essentially without loss: 57.0 ± 2.0% held out vs 56.5 ± 1.6% size-matched (+0.5 pts).
+- *Coding* is the clear exception: 61.4 ± 3.3% vs 73.7 ± 0.7% (-12.2 pts). On coding the size-matched control even beats the full-train model (70.1 ± 1.9%), so seed standard deviations understate run-to-run variation and the exact size of this gap is uncertain. Measured against the full-train model the drop is still -8.6 pts, so a real coding drop remains either way.
 - *The BiLSTM shows a different ordering:* writing 51.9 ± 1.9% vs 56.5 ± 1.2% (-4.6 pts), coding 52.7 ± 0.4% vs 54.0 ± 2.4% (-1.4 pts). This is a warning not to over-read single task comparisons.
 
 Every held-out accuracy (53.9–64.9%) stays far above chance. Per-task test sets are small (112–757 rows) and seed standard deviations are 1–4 points, so differences of a couple of points are within noise. The task labels come from keyword rules, and sources are not balanced across tasks; both remain confounds.

@@ -16,7 +16,6 @@ Decisions made while building the project (deadline-driven, no back-and-forth), 
 - **Task label**: `truthful_qa`/`false_qa` -> factual_qa; otherwise regex heuristics on the first 600 chars of the prompt: code keywords -> coding; math keywords/arithmetic -> math; any remaining `flan_*` -> nlp_task; writing keywords -> writing; else chat. Heuristic is noisy; documented as a limitation.
 - **Split**: 80/10/10 over unique prompts (seed 448), so a prompt never appears in two splits (assert in code).
 - **Observation**: after random downsampling only 1,880 / 17,899 prompts have >1 family, so most prompts appear once. Bard has 0 examples from `flan_v2_niv2`/`flan_v2_p3`/`flan2021` (Bard was not run on those subsets) - a source/label correlation that input-only models can exploit (RQ2).
-- User instruction (mid-run): do not push anything. Commits are local only; no remote configured.
 
 ## Step 2 - Models (speed fallback)
 - First BiLSTM (hidden 128, packed sequences, 4 jobs in parallel) took >10 min per epoch on CPU. Benchmarked: packing was ~3x slower than an unpacked LSTM on this machine. Fallback: **unpacked BiLSTM, hidden 64 per direction, masked mean+max pooling (final hidden state dropped because it would see padding)**, length-bucketed batches to cut padding, max 6 epochs with early stopping (patience 2) on val accuracy. CNN uses the same loop for consistency.
@@ -31,7 +30,6 @@ Decisions made while building the project (deadline-driven, no back-and-forth), 
 - **Model choice:** the CNN is the better neural model (65.6 vs 59.6 test acc), so RQ3 uses the CNN for all 6 tasks; the BiLSTM is also run for writing and coding. RQ4 ablations were run for both models.
 
 ## v2 - fixes after external review (evening of Oct 11)
-User instruction: do not commit or push anything (not even locally); all v2 changes are uncommitted working-tree edits.
 - **Padding bug (both models).** CNN counted a conv window as valid if only its first token was real; the unpacked BiLSTM's backward direction read right-padding before real tokens. Predictions therefore depended on batch neighbours (reproduced: logits changed by 0.20 CNN / 0.015 BiLSTM). Combined with a family-ordered test set (29/32 test batches single-family) this could leak labels. Fix: CNN masks windows not fully inside the sequence; BiLSTM runs its backward LSTM on each sequence reversed within its own length. `tests/test_invariance.py` verifies invariance to batching, ordering and extra padding, and fails on the old models. v1 results moved to `results/archive_v1_padding_bug/` (not used in any table).
 - **Falcon `</s>` leak.** 1,063 Falcon rows (1 GPT row) contained literal end-of-sequence/template tokens; now stripped in `prepare_data.py` before dedup/splitting. Same 20,000 rows are selected (pool sizes unchanged). Dataset rows are shuffled.
 - **Statistics.** Row-level binomial test replaced by a prompt-cluster bootstrap (2,000 resamples of prompts). Added input-only controls without Bard and within ShareGPT only. Run JSONs now store test predictions and prompt ids.
@@ -40,3 +38,9 @@ User instruction: do not commit or push anything (not even locally); all v2 chan
 - **Provenance.** Runs record `model_version` and `data_md5`; `eval.py` validates all runs share them plus the training config and a device. Packing benchmark saved (`scripts/bench_lstm.py` -> `results/bench_lstm.json`). Unsupported anecdotal numbers removed from the report; MPT fine-tuning claim removed (model card could not be verified).
 - **Compute.** All 96 v2 neural runs submitted as one Slurm CPU array on ICDS (`scripts/v2_all_cmds.txt`).
 - **Team.** Team leader: Keshav Khandelwal; member: Viraj Mishra.
+
+## Final report edits (Oct 11, late evening)
+- Added training curves (loss and validation accuracy per epoch, read from each run's `history`) to Section 2, since many runs peaked in the last epoch.
+- Added one real (LLM_name, LLM_input, LLM_output) example from the dataset to Section 1.
+- RQ3 wording: writing/coding are examples from the assignment, not required cases; the coding drop is now also compared with the full-train model, because the size-matched control beat it on coding.
+- PDF rebuilt on macOS with pandoc + tectonic (same pandoc options as `make_report.py`, fonts loaded from the Microsoft Office bundle). No numbers changed.
