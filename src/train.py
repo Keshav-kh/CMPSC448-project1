@@ -97,6 +97,7 @@ def main():
         print(f"[{name}] already done ({out_path}), skipping", flush=True)
         return
 
+    # Splits are fixed in the parquet file (grouped by prompt), so every run sees the same rows.
     df = load_dataset()
     tr, va, te = (df[df.split == s] for s in ("train", "val", "test"))
     if args.holdout_task:
@@ -104,6 +105,8 @@ def main():
         te_all = df[df.task == t]           # every row of the unseen task (never trained on)
         te = te[te.task == t]               # same rows the in-domain models are scored on
         tr, va = tr[tr.task != t], va[va.task != t]
+    # RQ3 control: same training-set size as the held-out run, but with all tasks present, so a
+    # held-out drop can't be blamed on simply having less training data.
     if args.size_match_task:
         n_match = int((tr.task != args.size_match_task).sum())
         tr = tr.sample(n=n_match, random_state=args.seed)
@@ -112,7 +115,7 @@ def main():
 
     tok = lambda d: build_tokens(d, args.setup, args.ablation, args.max_len)
     tr_tok = tok(tr)
-    vocab = Vocab(tr_tok)
+    vocab = Vocab(tr_tok)  # built from training text only, so val/test words never leak in
     mk = lambda toks, d, shuffle: DataLoader(
         TextDataset(toks, d.label, vocab, args.max_len), batch_size=args.batch_size, shuffle=shuffle, collate_fn=collate
     )
@@ -128,6 +131,8 @@ def main():
     opt = torch.optim.Adam(model.parameters(), lr=args.lr)
     loss_fn = nn.CrossEntropyLoss()
 
+    # Early stopping: keep a copy of the weights with the best validation accuracy; stop when
+    # validation accuracy has not improved for `patience` epochs in a row.
     best_acc, best_state, best_epoch, bad, history = -1.0, None, 0, 0, []
     t0 = time.time()
     for epoch in range(1, args.epochs + 1):
@@ -136,9 +141,9 @@ def main():
         for X, lens, y in train_loader:
             X, lens, y = X.to(device), lens.to(device), y.to(device)
             opt.zero_grad()
-            loss = loss_fn(model(X, lens), y)
+            loss = loss_fn(model(X, lens), y)  # cross-entropy between logits and true family
             loss.backward()
-            nn.utils.clip_grad_norm_(model.parameters(), 5.0)
+            nn.utils.clip_grad_norm_(model.parameters(), 5.0)  # cap gradient size (keeps LSTM training stable)
             opt.step()
             tot += loss.item() * len(y)
             n += len(y)
@@ -152,7 +157,7 @@ def main():
             bad += 1
             if bad >= args.patience:
                 break
-    model.load_state_dict(best_state)
+    model.load_state_dict(best_state)  # test the best-validation epoch, not the last one
 
     res = {
         "name": name, "args": vars(args), "n_params": n_params, "vocab_size": len(vocab),
@@ -162,6 +167,7 @@ def main():
         "best_epoch": best_epoch, "epochs_run": len(history), "best_val_acc": best_acc,
         "train_time_s": time.time() - t0, "history": history, "device": str(device),
     }
+    # The test split is scored once, here, after all training decisions were made on validation.
     p = predict(model, test_loader)
     res["test"] = compute_metrics(te.label.values, p, tasks=te.task.values)
     res["test_predictions"] = {"prompt_id": te.prompt_id.astype(int).tolist(), "y_true": te.label.astype(int).tolist(),

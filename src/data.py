@@ -51,6 +51,7 @@ def apply_text_ablation(text: str, ablation: str) -> str:
 # ---------------------------------------------------------------- vocab
 class Vocab:
     def __init__(self, token_lists, min_freq=2, max_size=30000):
+        # Keep the most frequent tokens seen at least min_freq times; rarer ones become <unk>.
         cnt = Counter(t for toks in token_lists for t in toks)
         words = [w for w, c in cnt.most_common(max_size) if c >= min_freq]
         self.itos = [PAD, UNK, SEP] + [w for w in words if w not in (PAD, UNK, SEP)]
@@ -73,6 +74,7 @@ def build_tokens(df: pd.DataFrame, setup: str, ablation: str = "none", max_len=2
     ablation 'window64': first 64 response tokens only (control: same budget, length kept).
     ablation 'all_surface': markdown stripped + lowercased + punctuation removed + no_length.
     """
+    # RQ2 compares the three setups; RQ4 ablations only change the response text.
     out = []
     for p, r in zip(df.prompt, df.response):
         r = apply_text_ablation(r, ablation)
@@ -108,6 +110,8 @@ class TextDataset(Dataset):
 
 
 def collate(batch):
+    # Pad every sequence in the batch with 0 (<pad>) up to the longest one. lens records the real
+    # lengths so the models can ignore the padding.
     xs, ys = zip(*batch)
     lens = torch.tensor([len(x) for x in xs])
     X = torch.zeros(len(xs), int(lens.max()), dtype=torch.long)
